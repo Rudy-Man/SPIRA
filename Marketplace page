@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketplace</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #23272f; margin: 0; color: #f4f4f4; }
+        .container { max-width: 900px; margin: 30px auto; background: #23272f; border: 1px solid #444; border-radius: 8px; box-shadow: 0 2px 8px #222; padding: 24px; }
+        h2 { margin-top: 0; color: #f4f4f4; }
+        .search-section, .featured-section, .category-section { margin-bottom: 32px; }
+        .search-bar, .filters { display: flex; gap: 12px; margin-bottom: 12px; }
+        .search-bar input { flex: 1; padding: 8px; border: 1px solid #444; border-radius: 4px; background: #2c2f36; color: #f4f4f4; }
+        .filters select { padding: 8px; border: 1px solid #444; border-radius: 4px; background: #2c2f36; color: #f4f4f4; }
+        .featured-items { display: flex; gap: 24px; }
+        .featured-card { flex: 1; border: 2px solid #34ace0; border-radius: 6px; padding: 12px; background: #2c2f36; color: #f4f4f4; }
+        .hero-image { width: 100%; height: 120px; border: 2px solid #34ace0; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 1.2em; color: #34ace0; margin-bottom: 10px; background: #23272f; }
+        .item-title { font-weight: bold; margin-bottom: 4px; }
+        .item-desc { font-size: 0.95em; color: #ccc; margin-bottom: 8px; }
+        .institution { font-size: 0.92em; color: #b0b0ff; margin-bottom: 8px; }
+        .view-btn { padding: 6px 18px; border: 2px solid #34ace0; background: #23272f; color: #34ace0; border-radius: 4px; cursor: pointer; font-weight: 600; transition: background 0.2s; }
+        .view-btn:hover { background: #26324b; }
+        .category-section { margin-top: 32px; }
+        .category-list { display: flex; gap: 16px; }
+        .category-btn { padding: 10px 22px; border: 2px solid #34ace0; background: #23272f; color: #34ace0; border-radius: 4px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+        .category-btn:hover { background: #26324b; }
+        @media (max-width: 700px) {
+            .container { padding: 10px; }
+            .featured-items { flex-direction: column; gap: 16px; }
+            .category-list { flex-direction: column; gap: 10px; }
+        }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .nav { display: flex; gap: 20px; }
+        .nav a { color: #34ace0; font-weight: 600; text-decoration: none; padding-bottom: 2px; border-bottom: 2px solid transparent; transition: border 0.2s; }
+        .nav a.active, .nav a:hover { border-bottom: 2px solid #4a47a3; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Marketplace</h2>
+            <nav class="nav">
+                <a href="ligo.html">Home</a>
+                <a href="Marketplace.html" class="active">Marketplace</a>
+                <a href="Threads.html">Threads</a>
+            </nav>
+        </div>
+        <section class="search-section">
+            <h2>Search & Filters</h2>
+            <div class="search-bar">
+                <input type="text" placeholder="Search">
+            </div>
+            <div class="filters">
+                <select><option>Type</option></select>
+                <select><option>Location</option></select>
+                <select><option>Field</option></select>
+            </div>
+        </section>
+        <section class="featured-section">
+            <h2>Featured Items</h2>
+            <div class="featured-items">
+                <div class="featured-card">
+                    <div class="hero-image">HERO IMAGE</div>
+                    <div class="item-title">Item Title</div>
+                    <div class="item-desc">Description</div>
+                    <div class="institution">Institution Name</div>
+                    <button class="view-btn">View</button>
+                </div>
+                <div class="featured-card">
+                    <div class="hero-image">HERO IMAGE</div>
+                    <div class="item-title">Item Title</div>
+                    <div class="item-desc">Description</div>
+                    <div class="institution">Institution Name</div>
+                    <button class="view-btn">View</button>
+                </div>
+            </div>
+        </section>
+        <section class="category-section">
+            <h2>Browse by Category</h2>
+            <div class="category-list">
+                <button class="category-btn">Equipment</button>
+                <button class="category-btn">Datasets</button>
+                <button class="category-btn">Services</button>
+            </div>
+        </section>
+    </div>
+    <script>
+        // Dark mode support
+        function applyColorScheme(scheme) {
+            if (scheme === 'dark') {
+                document.documentElement.style.setProperty('--bg-color', '#23272f');
+                document.documentElement.style.setProperty('--text-color', '#f4f4f4');
+                document.documentElement.style.setProperty('--light-gray', '#2c2f36');
+                document.documentElement.style.setProperty('--border-color', '#444');
+            } else {
+                document.documentElement.style.setProperty('--bg-color', '#ffffff');
+                document.documentElement.style.setProperty('--text-color', '#26324b');
+                document.documentElement.style.setProperty('--light-gray', '#f7f9fa');
+                document.documentElement.style.setProperty('--border-color', '#cfd8dc');
+            }
+        }
+        const savedScheme = localStorage.getItem('color-scheme');
+        if (savedScheme) applyColorScheme(savedScheme);
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'color-scheme') applyColorScheme(e.newValue);
+        });
+
+        function updateMarketplaceInteractivity() {
+            const isSignedIn = localStorage.getItem('isSignedIn') === 'true';
+            document.querySelectorAll('.view-btn, .category-btn').forEach(btn => {
+                btn.disabled = !isSignedIn;
+                btn.title = isSignedIn ? '' : 'Sign in to interact';
+                btn.style.opacity = isSignedIn ? '1' : '0.5';
+                btn.style.cursor = isSignedIn ? 'pointer' : 'not-allowed';
+            });
+        }
+        updateMarketplaceInteractivity();
+        window.addEventListener('storage', updateMarketplaceInteractivity);
+    </script>
+</body>
+</html>
