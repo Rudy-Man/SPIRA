@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPIRA - Equipment Listing Details</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4a47a3;
+            --secondary-color: #706fd3;
+            --accent-color: #34ace0;
+            --text-color: #23272f;
+            --bg-color: #23272f;
+            --light-gray: #2c2f36;
+            --white: #fff;
+            --border-color: #444;
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-color);
+            margin: 0;
+            color: var(--text-color);
+        }
+        .nav-bar {
+            display: flex;
+            justify-content: center;
+            gap: 18px;
+            background: var(--bg-color);
+            padding: 18px 0 10px 0;
+        }
+        .nav-btn {
+            background: var(--bg-color);
+            color: var(--accent-color);
+            border: 2px solid var(--accent-color);
+            border-radius: 50px;
+            padding: 8px 28px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s, border 0.2s;
+            text-decoration: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+        }
+        .nav-btn:hover, .nav-btn.active {
+            background: var(--accent-color);
+            color: var(--bg-color);
+            border-color: var(--primary-color);
+        }
+        .main-container {
+            max-width: 1200px;
+            margin: 32px auto;
+            background: var(--white);
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            box-shadow: 0 2px 12px rgba(44,47,54,0.07);
+            padding: 24px 18px 32px 18px;
+        }
+        .top-section {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        .left-col, .right-col {
+            background: var(--white);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 18px 16px;
+            flex: 1;
+        }
+        .left-col {
+            max-width: 50%;
+        }
+        .main-image {
+            width: 100%;
+            height: 200px;
+            background: #e6e8fa;
+            border: 2px solid var(--primary-color);
+            border-radius: 6px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: var(--secondary-color);
+        }
+        .thumb-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+        .thumb {
+            width: 50px;
+            height: 50px;
+            background: #e6e8fa;
+            border: 2px solid var(--primary-color);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--secondary-color);
+            font-size: 1.3rem;
+        }
+        .left-btn {
+            width: 100%;
+            margin-bottom: 10px;
+            background: var(--white);
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            border-radius: 4px;
+            padding: 8px 0;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+        .left-btn:hover {
+            background: var(--primary-color);
+            color: var(--white);
+        }
+        .right-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .uni-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+        .uni-icon {
+            font-size: 2rem;
+            color: var(--primary-color);
+        }
+        .uni-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        .stars {
+            color: #4a47a3;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+        .calendar {
+            width: 100%;
+            max-width: 260px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            margin-bottom: 16px;
+            background: #f7f7fc;
+            padding: 10px 8px;
+        }
+        .calendar-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+        }
+        .calendar-table th, .calendar-table td {
+            border: 1px solid var(--border-color);
+            padding: 4px 0;
+            font-size: 1rem;
+            color: var(--primary-color);
+        }
+        .calendar-table th {
+            background: #e6e8fa;
+            font-weight: 600;
+        }
+        .calendar-table td {
+            background: #fff;
+        }
+        .right-btn {
+            width: 100%;
+            margin: 10px 0 8px 0;
+            background: var(--white);
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            border-radius: 4px;
+            padding: 10px 0;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+        .right-btn:hover {
+            background: var(--primary-color);
+            color: var(--white);
+        }
+        .fee-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        .fee-label {
+            color: var(--primary-color);
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        .fee-input {
+            width: 60px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 1rem;
+        }
+        .tab-section {
+            margin-top: 18px;
+        }
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid var(--primary-color);
+            margin-bottom: 0;
+        }
+        .tab {
+            padding: 10px 24px;
+            font-weight: 600;
+            color: var(--primary-color);
+            background: transparent;
+            border: none;
+            border-bottom: 2.5px solid transparent;
+            cursor: pointer;
+            font-size: 1.05rem;
+            transition: border 0.2s, color 0.2s;
+        }
+        .tab.active {
+            border-bottom: 2.5px solid var(--primary-color);
+            color: var(--secondary-color);
+        }
+        .tab-content {
+            background: var(--white);
+            border: none;
+            min-height: 80px;
+            padding: 18px 0 18px 0;
+            border-bottom: 2px solid var(--primary-color);
+        }
+        .feedback-section {
+            margin-top: 18px;
+        }
+        .feedback-tabs {
+            display: flex;
+            border-bottom: 2px solid var(--primary-color);
+            margin-bottom: 0;
+        }
+        .feedback-tab {
+            padding: 10px 24px;
+            font-weight: 600;
+            color: var(--primary-color);
+            background: transparent;
+            border: none;
+            border-bottom: 2.5px solid transparent;
+            cursor: pointer;
+            font-size: 1.05rem;
+            transition: border 0.2s, color 0.2s;
+        }
+        .feedback-tab.active {
+            border-bottom: 2.5px solid var(--primary-color);
+            color: var(--secondary-color);
+        }
+        .feedback-list {
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        .feedback-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .feedback-icon {
+            font-size: 1.3rem;
+            color: var(--primary-color);
+        }
+        .feedback-line {
+            border-bottom: 2px dashed var(--secondary-color);
+            width: 100%;
+            height: 18px;
+        }
+        @media (max-width: 900px) {
+            .main-container { padding: 0 0 24px 0; }
+            .top-section { flex-direction: column; gap: 18px; }
+            .left-col, .right-col { max-width: 100%; }
+        }
+    </style>
+    <script>
+        function setActiveTab(tabGroup, tabIndex) {
+            document.querySelectorAll('.' + tabGroup + ' .tab').forEach((tab, idx) => {
+                tab.classList.toggle('active', idx === tabIndex);
+            });
+            document.querySelectorAll('.' + tabGroup + ' .tab-content').forEach((content, idx) => {
+                content.style.display = idx === tabIndex ? 'block' : 'none';
+            });
+        }
+        function setActiveFeedbackTab(tabIndex) {
+            document.querySelectorAll('.feedback-tabs .feedback-tab').forEach((tab, idx) => {
+                tab.classList.toggle('active', idx === tabIndex);
+            });
+            document.querySelectorAll('.feedback-section .tab-content').forEach((content, idx) => {
+                content.style.display = idx === tabIndex ? 'block' : 'none';
+            });
+        }
+        window.onload = function() {
+            setActiveTab('tab-section1', 0);
+            setActiveTab('tab-section2', 1);
+            setActiveFeedbackTab(2);
+        };
+    </script>
+</head>
+<body>
+    <div class="nav-bar">
+        <a href="ligo.html" class="nav-btn">Home</a>
+        <a href="Marketplace.html" class="nav-btn">Marketplace</a>
+        <a href="Threads.html" class="nav-btn">Threads</a>
+    </div>
+    <div class="main-container">
+        <div class="top-section">
+            <div class="left-col">
+                <div class="main-image">Main Image</div>
+                <div class="thumb-row">
+                    <div class="thumb"></div>
+                    <div class="thumb"></div>
+                    <div class="thumb"></div>
+                    <div class="thumb"></div>
+                </div>
+                <button class="left-btn">Technical Specs</button>
+                <button class="left-btn">Instruction Manual (PDF)</button>
+                <button class="left-btn">Terms and Conditions</button>
+            </div>
+            <div class="right-col">
+                <div class="uni-row">
+                    <span class="uni-icon"><i class="fas fa-user-circle"></i></span>
+                    <span class="uni-name">University name</span>
+                </div>
+                <div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                <div class="calendar">
+                    <table class="calendar-table">
+                        <tr><th>S</th><th>M</th><th>T</th><th>W</th><th>T</th><th>F</th><th>S</th></tr>
+                        <tr><td> </td><td> </td><td> </td><td>1</td><td>2</td><td>3</td><td>4</td></tr>
+                        <tr><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td><td>11</td></tr>
+                        <tr><td>12</td><td>13</td><td>14</td><td>15</td><td>16</td><td>17</td><td>18</td></tr>
+                        <tr><td>19</td><td>20</td><td>21</td><td>22</td><td>23</td><td>24</td><td>25</td></tr>
+                        <tr><td>26</td><td>27</td><td>28</td><td> </td><td> </td><td> </td><td> </td></tr>
+                    </table>
+                </div>
+                <button class="right-btn">Request To Use</button>
+                <div class="fee-row">
+                    <span class="fee-label">Operator fee</span>
+                    <input class="fee-input" type="text">
+                </div>
+                <div class="fee-row">
+                    <span class="fee-label">Remote access fee</span>
+                    <input class="fee-input" type="text">
+                </div>
+            </div>
+        </div>
+        <div class="tab-section tab-section1">
+            <div class="tabs">
+                <button class="tab" onclick="setActiveTab('tab-section1',0)">Equipment Details</button>
+                <button class="tab" onclick="setActiveTab('tab-section1',1)">Safety requirements</button>
+                <button class="tab" onclick="setActiveTab('tab-section1',2)">Reviews</button>
+            </div>
+            <div class="tab-content">Equipment details content here...</div>
+            <div class="tab-content">Safety requirements content here...</div>
+            <div class="tab-content">Reviews content here...</div>
+        </div>
+        <div class="tab-section tab-section2">
+            <div class="tabs">
+                <button class="tab" onclick="setActiveTab('tab-section2',0)">Equipment Details</button>
+                <button class="tab" onclick="setActiveTab('tab-section2',1)">Safety requirements</button>
+                <button class="tab" onclick="setActiveTab('tab-section2',2)">Reviews</button>
+            </div>
+            <div class="tab-content">Equipment details content here...</div>
+            <div class="tab-content">Safety requirements content here...</div>
+            <div class="tab-content">Reviews content here...</div>
+        </div>
+        <div class="feedback-section">
+            <div class="feedback-tabs">
+                <button class="feedback-tab" onclick="setActiveFeedbackTab(0)">Equipment Details</button>
+                <button class="feedback-tab" onclick="setActiveFeedbackTab(1)">Safety requirements</button>
+                <button class="feedback-tab" onclick="setActiveFeedbackTab(2)">Reviews</button>
+            </div>
+            <div class="tab-content">
+                <div class="feedback-list">
+                    <div class="feedback-item"><span class="feedback-icon"><i class="fas fa-user-circle"></i></span><div class="feedback-line"></div></div>
+                    <div class="feedback-item"><span class="feedback-icon"><i class="fas fa-user-circle"></i></span><div class="feedback-line"></div></div>
+                    <div class="feedback-item"><span class="feedback-icon"><i class="fas fa-user-circle"></i></span><div class="feedback-line"></div></div>
+                    <div class="feedback-item"><span class="feedback-icon"><i class="fas fa-user-circle"></i></span><div class="feedback-line"></div></div>
+                </div>
+            </div>
+            <div class="tab-content" style="display:none;"></div>
+            <div class="tab-content" style="display:none;"></div>
+        </div>
+    </div>
+</body>
+</html>
