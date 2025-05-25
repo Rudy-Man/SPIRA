@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LIGO - Science Connected (Single File)</title>
+    <title>SPIRA - Science Connected (Single File)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -737,7 +737,7 @@
     <header>
         <div class="container">
             <a href="#" class="logo">
-                <i class="fas fa-flask-vial logo-icon"></i> LIGO
+                <i class="fas fa-flask-vial logo-icon"></i> SPIRA
             </a>
             <nav>
                 <ul>
@@ -851,7 +851,7 @@
  
     <footer>
         <div class="container">
-            <p>&copy; 2025 LIGO. All rights reserved.</p> </div>
+            <p>&copy; 2025 SPIRA. All rights reserved.</p> </div>
     </footer>
  
     <div id="overlay" class="overlay"></div>
@@ -919,7 +919,7 @@
     <section id="about-us" style="background: #23272f; color: #f4f4f4; padding: 60px 0;">
         <div class="container" style="max-width: 800px;">
             <h2 style="color: #34ace0;">About Us</h2>
-            <p style="font-size: 1.15em; margin-bottom: 24px;">LIGO is dedicated to connecting scientists, researchers, and institutions worldwide, breaking down barriers to collaboration and discovery. Our platform empowers users to share resources, ideas, and opportunities in a seamless, global environment.</p>
+            <p style="font-size: 1.15em; margin-bottom: 24px;">SPIRA is dedicated to connecting scientists, researchers, and institutions worldwide, breaking down barriers to collaboration and discovery. Our platform empowers users to share resources, ideas, and opportunities in a seamless, global environment.</p>
             <div style="margin-top: 32px;">
                 <h3 style="color: #b0b0ff;">Founder</h3>
                 <div style="display: flex; align-items: center; gap: 18px;">
