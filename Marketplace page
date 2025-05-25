@@ -44,6 +44,7 @@
                 <a href="Marketplace.html" class="active">Marketplace</a>
                 <a href="Threads.html">Threads</a>
             </nav>
+            <a href="Listing.html" class="list-lab-btn" style="margin-left:20px; padding:8px 20px; border:2px solid #34ace0; background:#23272f; color:#34ace0; border-radius:4px; font-weight:600; text-decoration:none; transition:background 0.2s;">List Your Laboratory</a>
         </div>
         <section class="search-section">
             <h2>Search & Filters</h2>
