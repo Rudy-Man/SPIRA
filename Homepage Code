@@ -730,6 +730,18 @@
              .sidebar.active { transform: translateX(-320px); }
         }
  
+        .listing-container {
+            max-width: 90%; /* Changed from 1100px */
+            margin: 32px auto;
+            background: var(--white);
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            box-shadow: 0 2px 12px rgba(44,47,54,0.07);
+            padding: 0 0 32px 0;
+            padding-left: 10px; /* Added for responsiveness */
+            padding-right: 10px; /* Added for responsiveness */
+        }
+ 
     </style>
 </head>
 <body>
@@ -742,7 +754,7 @@
             <nav>
                 <ul>
                     <li><a href="Marketplace.html">Marketplace</a></li>
-                    <li><a href="#">Discoveries</a></li>
+                    
                     <li><a href="Threads.html">Threads</a></li>
                 </ul>
             </nav>
@@ -763,7 +775,7 @@
      <nav class="mobile-nav">
          <ul>
             <li><a href="Marketplace.html">Marketplace</a></li>
-            <li><a href="#">Discoveries</a></li>
+            
             <li><a href="Threads.html">Threads</a></li>
             <li>
                 <form class="mobile-search-form">
@@ -864,34 +876,12 @@
             <p class="bio">About me: Short bio placeholder text here...</p>
         </div>
  
-        <div class="profile-stats">
-            <div><span>5</span><span class="label">Threads</span></div>
-            <div><span>98268</span><span class="label">Followers</span></div>
-            <div><span>7</span><span class="label">Publications</span></div>
+        <div class="profile-stats" style="justify-content: space-around;">
+            <div><span>X</span><span class="label">Rented</span></div>
+            <div><span>X</span><span class="label">Listed</span></div>
         </div>
  
-        <div class="my-items">
-            <h4>My Threads</h4>
-            <div class="item-previews">
-                <div class="preview placeholder small"></div>
-                <div class="preview placeholder small"></div>
-                <div class="preview placeholder small"></div>
-            </div>
-            <a href="#" class="see-more">See more <i class="fas fa-arrow-right"></i></a>
-        </div>
- 
-        <div class="my-items">
-            <h4>My Publications</h4>
-             <div class="item-previews">
-                <div class="preview placeholder small"></div>
-                <div class="preview placeholder small"></div>
-                <div class="preview placeholder small"></div>
-            </div>
-            <a href="#" class="see-more">See more <i class="fas fa-arrow-right"></i></a>
-        </div>
- 
-        <div class="profile-actions">
-            <button id="settings-btn"><i class="fas fa-cog"></i> Settings</button>
+        <div class="profile-actions" style="margin-top: 30px;">
             <button><i class="fas fa-sign-out-alt"></i> Log out</button>
         </div>
     </aside>
