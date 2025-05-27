@@ -276,7 +276,7 @@
         <div class="top-bar">
             <span class="user-icon"><i class="fas fa-user-circle"></i></span>
             <span class="university-name">UNIVERSITY NAME</span>
-            <button class="list-equip-btn" onclick="window.location.href='Listings2.html'">LIST YOUR EQUIPMENT</button>
+            <button class="list-equip-btn" onclick="window.location.href='Listing1.1.html'">LIST YOUR EQUIPMENT</button>
         </div>
         <div class="section">
             <div class="section-title" style="margin-top:24px;">Upcoming Orders</div>
