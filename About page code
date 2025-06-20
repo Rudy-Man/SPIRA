@@ -44,6 +44,13 @@
                     <div class="role">Coding</div>
                 </div>
             </div>
+            <div class="member">
+                <div class="avatar">KS</div>
+                <div class="info">
+                    <div class="name">Kapish Sharma</div>
+                    <div class="role">Coding, Graphic Designer, and University Liaison</div>
+                </div>
+            </div>
         </div>
         <a href="ligo.html" class="btn">Back to Home</a>
     </div>
