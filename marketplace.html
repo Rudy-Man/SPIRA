@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scientific Marketplace</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4a47a3;
+            --secondary-color: #706fd3;
+            --accent-color: #34ace0;
+            --text-color: #f4f4f4;
+            --light-text-color: #f4f4f4;
+            --bg-color: #23272f;
+            --light-gray: #2c2f36;
+            --border-color: #444;
+        }
+        body {
+            font-family: 'Poppins', Arial, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+        }
+        .header-bar {
+            display: flex; align-items: center; justify-content: space-between;
+            background: var(--bg-color); border-bottom: 2px solid var(--border-color); padding: 18px 32px;
+        }
+        .logo { font-size: 1.6rem; font-weight: bold; color: var(--primary-color); display: flex; align-items: center; gap: 8px; }
+        .logo i { color: var(--accent-color); }
+        .marketplace-link { color: var(--primary-color); font-weight: 600; margin-left: 18px; text-decoration: underline; }
+        .search-bar-header { display: flex; align-items: center; background: var(--light-gray); border-radius: 20px; padding: 4px 12px; }
+        .search-bar-header input { border: none; background: transparent; outline: none; font-size: 1rem; padding: 6px 8px; color: var(--text-color); }
+        .profile-icon { font-size: 1.7rem; color: var(--primary-color); margin-left: 18px; }
+        .main-flex { display: flex; max-width: 1300px; margin: 32px auto; background: var(--light-gray); border-radius: 10px; box-shadow: 0 2px 12px var(--border-color); }
+        .sidebar { width: 230px; background: var(--light-gray); border-right: 2px solid var(--border-color); padding: 24px 0 24px 24px; }
+        .filter-btn { display: block; width: 90%; background: var(--bg-color); color: var(--primary-color); border: 2px solid var(--primary-color); border-radius: 6px; font-weight: 700; padding: 8px 0; margin-bottom: 12px; cursor: pointer; margin-left: 0; transition: all 0.3s; }
+        .filter-btn:hover { background: var(--light-gray); color: var(--secondary-color); border-color: var(--secondary-color); }
+        .filter-section { margin-bottom: 18px; }
+        .filter-label { font-weight: 600; color: var(--primary-color); margin-bottom: 6px; display: block; }
+        .filter-select, .filter-range { width: 90%; padding: 6px; border-radius: 4px; border: 1px solid var(--border-color); margin-bottom: 6px; background: var(--bg-color); color: var(--text-color); }
+        .main-content { flex: 1; padding: 32px 40px; }
+        .marketplace-title-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+        .marketplace-title { font-size: 2rem; font-weight: 700; color: var(--primary-color); letter-spacing: 1px; }
+        .sort-by { font-size: 1rem; color: var(--primary-color); }
+        .sort-by select { padding: 4px 10px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-color); }
+        .search-bar-main { display: flex; align-items: center; margin-bottom: 24px; }
+        .search-bar-main input { width: 320px; padding: 8px 14px; border-radius: 20px; border: 1.5px solid var(--border-color); font-size: 1rem; margin-right: 8px; background: var(--bg-color); color: var(--text-color); }
+        .search-bar-main button { background: var(--primary-color); color: var(--light-text-color); border: none; border-radius: 20px; padding: 8px 18px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+        .search-bar-main button:hover { background: var(--secondary-color); color: var(--light-text-color); }
+        .btn { display: inline-block; padding: 10px 25px; border-radius: 50px; text-align: center; font-weight: 600; transition: all 0.3s; cursor: pointer; border: 2px solid transparent; font-size: 0.9rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .btn-secondary { background-color: var(--bg-color); color: var(--primary-color); border: 2px solid var(--primary-color); }
+        .btn-secondary:hover { background-color: var(--light-gray); color: var(--secondary-color); border-color: var(--secondary-color); transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .equipment-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+        .equip-card { background: var(--bg-color); border: 2px solid var(--border-color); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; align-items: flex-start; }
+        .equip-image { width: 100%; height: 110px; background: var(--light-gray); border-radius: 6px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; color: var(--secondary-color); font-size: 2.2rem; }
+        .equip-title { font-size: 1.1rem; font-weight: 600; color: var(--primary-color); margin-bottom: 2px; }
+        .equip-university { font-size: 0.97rem; color: var(--secondary-color); margin-bottom: 4px; }
+        .equip-stars { color: #f7b731; font-size: 1.1rem; margin-bottom: 6px; }
+        .equip-view-btn { background: var(--bg-color); color: var(--primary-color); border: 1.5px solid var(--primary-color); border-radius: 4px; padding: 5px 16px; font-size: 0.95rem; font-weight: 600; cursor: pointer; margin-top: 6px; transition: background 0.2s, color 0.2s; text-decoration: none; text-align: center; }
+        .equip-view-btn:hover { background: var(--light-gray); color: var(--secondary-color); border-color: var(--secondary-color); }
+        @media (max-width: 1100px) { .main-flex { flex-direction: column; } .sidebar { width: 100%; border-right: none; border-bottom: 2px solid var(--border-color); padding: 18px 0 0 0; } .main-content { padding: 24px 10px; } .equipment-grid { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 700px) { .main-flex { flex-direction: column; } .sidebar { width: 100%; border-right: none; border-bottom: 2px solid var(--border-color); padding: 12px 0 0 0; } .main-content { padding: 12px 2px; } .equipment-grid { grid-template-columns: 1fr; } }
+        .marketplace-container {
+            max-width: 90%;
+            margin: 20px auto;
+            padding: 20px 10px;
+            background-color: var(--bg-color);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+        }
+    </style>
+</head>
+<body>
+    <div class="header-bar">
+        <div class="logo"><i class="fas fa-puzzle-piece"></i> SPIRA <a href="#" class="marketplace-link">Marketplace</a></div>
+        <div class="search-bar-header">
+            <input type="text" placeholder="Search...">
+            <i class="fas fa-search"></i>
+        </div>
+        <i class="fas fa-user-circle profile-icon"></i>
+        <a href="Listing.html" class="btn btn-secondary" style="font-size: 1rem; padding: 8px 18px; margin-left: 18px;">List Your Equipment</a>
+    </div>
+    <div class="main-flex">
+        <aside class="sidebar">
+            <button class="filter-btn">Filters</button>
+            <div class="filter-section">
+                <label class="filter-label">Location</label>
+                <select class="filter-select"><option>All</option><option>University A</option><option>University B</option></select>
+            </div>
+            <div class="filter-section">
+                <label class="filter-label">Equipment Type</label>
+                <select class="filter-select"><option>All</option><option>Physics</option><option>Chemistry</option><option>Biology</option><option>Computer Science</option></select>
+            </div>
+            <div class="filter-section">
+                <label class="filter-label">Price</label>
+                <input class="filter-range" id="price-range" type="range" min="1000" max="20000" value="10000" step="100">
+                <span id="price-value" style="font-size:0.98em; color:#4a47a3; font-weight:600; margin-left:8px;">$10,000</span>
+                <input class="filter-select" id="price-filter-text" type="text" placeholder="e.g., 1000 or 100-500" style="width: 90%; margin-top: 10px;">
+            </div>
+            <div class="filter-section">
+                <label class="filter-label">Availability</label>
+                <select class="filter-select"><option>All</option><option>Available</option><option>Unavailable</option></select>
+            </div>
+        </aside>
+        <main class="main-content">
+            <a href="ligo.html" class="btn btn-secondary" style="margin-bottom: 18px; display: inline-block;">&larr; Back to Home</a>
+            <div class="marketplace-title-row">
+                <span class="marketplace-title">SCIENCE MARKETPLACE</span>
+                <span class="sort-by">sort by <select><option>Relevance</option><option>Price</option><option>Rating</option></select></span>
+            </div>
+            <div class="search-bar-main">
+                <input type="text" placeholder="Search...">
+                <button><i class="fas fa-search"></i></button>
+            </div>
+            <div class="equipment-grid">
+                <div class="equip-card">
+                    <div class="equip-image"><i class="fas fa-flask"></i></div>
+                    <div class="equip-title">Equipment Type</div>
+                    <div class="equip-university">Descrniegon University</div>
+                    <div class="equip-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                    <a href="Listings2.html" class="equip-view-btn">View More</a>
+                </div>
+                <div class="equip-card">
+                    <div class="equip-image"><i class="fas fa-dna"></i></div>
+                    <div class="equip-title">Equipment Type</div>
+                    <div class="equip-university">Descrniegon University</div>
+                    <div class="equip-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                    <a href="Listings2.html" class="equip-view-btn">View More</a>
+                </div>
+                <div class="equip-card">
+                    <div class="equip-image"><i class="fas fa-microscope"></i></div>
+                    <div class="equip-title">Equipment Type</div>
+                    <div class="equip-university">Descrniegon University</div>
+                    <div class="equip-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                    <a href="Listings2.html" class="equip-view-btn">View More</a>
+                </div>
+                <div class="equip-card">
+                    <div class="equip-image"><i class="fas fa-atom"></i></div>
+                    <div class="equip-title">Equipment Type</div>
+                    <div class="equip-university">Descrniegon University</div>
+                    <div class="equip-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                    <a href="Listings2.html" class="equip-view-btn">View More</a>
+                </div>
+                <div class="equip-card">
+                    <div class="equip-image"><i class="fas fa-vial"></i></div>
+                    <div class="equip-title">Equipment Type</div>
+                    <div class="equip-university">Descrniegon University</div>
+                    <div class="equip-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                    <a href="Listings2.html" class="equip-view-btn">View More</a>
+                </div>
+                <div class="equip-card">
+                    <div class="equip-image"><i class="fas fa-biohazard"></i></div>
+                    <div class="equip-title">Equipment Type</div>
+                    <div class="equip-university">Descrniegon University</div>
+                    <div class="equip-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                    <a href="Listings2.html" class="equip-view-btn">View More</a>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var priceRange = document.getElementById('price-range');
+        var priceValue = document.getElementById('price-value');
+        function formatUSD(val) {
+            return '$' + Number(val).toLocaleString();
+        }
+        priceRange.addEventListener('input', function() {
+            priceValue.textContent = formatUSD(this.value);
+        });
+        priceValue.textContent = formatUSD(priceRange.value);
+    });
+    </script>
+</body>
+</html>
