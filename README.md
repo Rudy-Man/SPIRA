@@ -1,2 +1,0 @@
-# LIGO
-LIGO Website Code
