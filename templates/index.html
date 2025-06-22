@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPIRA - Science Connected</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+ 
+    <header>
+        <div class="container">
+            <a href="{{ url_for('index') }}" class="logo">
+                <i class="fas fa-flask-vial logo-icon"></i> SPIRA
+            </a>
+            <nav>
+                <ul>
+                    <li><a href="{{ url_for('market') }}">Marketplace</a></li>
+                    <li><a href="#">Threads</a></li>
+                </ul>
+            </nav>
+            <div class="header-right">
+                <form class="search-form">
+                    <input type="search" placeholder="Search...">
+                    <button type="submit"><i class="fas fa-search"></i></button>
+                </form>
+
+                {% if current_user.is_authenticated %}
+                    
+                    {% if current_user.is_university %}
+                        <a href="{{ url_for('register_equipment') }}" class="btn btn-secondary">List Equipment</a>
+                    {% endif %}
+
+                    <a href="{{ url_for('logout') }}" class="btn btn-primary">Log Out</a>
+                    <button id="user-profile-button" class="user-profile-btn" aria-label="User Profile">
+                        <i class="fas fa-user-circle"></i>
+                    </button>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="btn btn-primary">Sign In</a>
+                {% endif %}
+            </div>
+             <button class="mobile-menu-toggle" aria-label="Toggle Menu"><i class="fas fa-bars"></i></button>
+        </div>
+    </header>
+ 
+     <nav class="mobile-nav">
+         <ul>
+            <li><a href="{{ url_for('market') }}">Marketplace</a></li>
+            <li><a href="#">Threads</a></li>
+            <li>
+                <form class="mobile-search-form">
+                    <input type="search" placeholder="Search...">
+                    <button type="submit"><i class="fas fa-search"></i></button>
+                </form>
+            </li>
+        </ul>
+    </nav>
+ 
+    <main>
+        <section class="hero hero-1">
+            <div class="container hero-content">
+                <div class="hero-text"> <h1>Science, Connected.</h1>
+                    <p>Empowering global collaboration, one discovery at a time.</p>
+                    <div class="cta-buttons">
+                        <a href="{{ url_for('market') }}" class="btn btn-primary">Explore Marketplace</a>
+                        <a href="#" class="btn btn-secondary">Join a Thread</a>
+                    </div>
+                </div>
+                <div class="hero-image placeholder"> <span>HERO IMAGE</span>
+                </div>
+            </div>
+        </section>
+ 
+        <section class="global-lab">
+            <div class="container">
+                <div class="lab-text">
+                    <h2>The Global Laboratory at Your Fingertips</h2> <p>Create, collaborate, and share with scientists worldwide.</p>
+                </div>
+                <div class="how-it-works">
+                    <div class="feature-box"> <i class="fas fa-magnifying-glass-chart feature-icon"></i>
+                        <h3>Find</h3>
+                        <p>Discover equipment or collaborators</p>
+                    </div>
+                    <div class="feature-box"> <i class="fas fa-users feature-icon"></i>
+                        <h3>Collaborate</h3>
+                        <p>Work together globally</p>
+                    </div>
+                    <div class="feature-box"> <i class="fas fa-book-open-reader feature-icon"></i>
+                        <h3>Research hub</h3>
+                        <p>Browse and share publications</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+ 
+        <section class="hero hero-2">
+            <div class="container">
+                 <div class="hero-image placeholder large"> <span>HERO IMAGE</span>
+                </div>
+            </div>
+        </section>
+ 
+        <section class="marketplace">
+            <div class="container">
+                <h2>A Marketplace for Science</h2> <div class="item-grid">
+                    <div class="item-card"> <div class="item-image placeholder small"></div>
+                        <p>X equipment at X university</p>
+                        <p class="price">$X /h</p>
+                    </div>
+                    <div class="item-card"> <div class="item-image placeholder small"></div>
+                        <p>X equipment at X university</p>
+                        <p class="price">$X /h</p>
+                    </div>
+                    <div class="item-card"> <div class="item-image placeholder small"></div>
+                        <p>X equipment at X university</p>
+                        <p class="price">$X /h</p>
+                    </div>
+                    <div class="item-card"> <div class="item-image placeholder small"></div>
+                        <p>X equipment at X university</p>
+                        <p class="price">$X /h</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+ 
+        <section class="footer-cta" style="background-color: #23272f; color: #f4f4f4;">
+            <div class="container">
+                <p>"Science has no borders. Neither should opportunity."</p>
+                <a href="#about-us" class="btn btn-secondary">About us</a>
+            </div>
+        </section>
+    </main>
+ 
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 SPIRA. All rights reserved.</p> </div>
+    </footer>
+ 
+    <div id="overlay" class="overlay"></div>
+    <aside id="user-profile-sidebar" class="sidebar">
+        </aside>
+    <script>
+        // Your existing JavaScript
+    </script>
+ 
+</body>
+</html>

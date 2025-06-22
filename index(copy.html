@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPIRA - Science Connected</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+</head>
+<body>
+ 
+    <header>
+        <div class="container">
+            <a href="{{ url_for('index') }}" class="logo">
+                <i class="fas fa-flask-vial logo-icon"></i> SPIRA
+            </a>
+            <nav>
+                <ul>
+                    <li><a href="{{ url_for('market') }}">Marketplace</a></li>
+                    <li><a href="#">Threads</a></li>
+                </ul>
+            </nav>
+            <div class="header-right">
+                <form class="search-form">
+                    <input type="search" placeholder="Search...">
+                    <button type="submit"><i class="fas fa-search"></i></button>
+                </form>
+
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('logout') }}" class="btn btn-primary">Log Out</a>
+                    <button id="user-profile-button" class="user-profile-btn" aria-label="User Profile">
+                        <i class="fas fa-user-circle"></i>
+                    </button>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="btn btn-primary">Sign In</a>
+                {% endif %}
+            </div>
+             <button class="mobile-menu-toggle" aria-label="Toggle Menu"><i class="fas fa-bars"></i></button>
+        </div>
+    </header>
+ 
+     <nav class="mobile-nav">
+         <ul>
+            <li><a href="Marketplace.html">Marketplace</a></li>
+            
+            <li><a href="Threads.html">Threads</a></li>
+            <li>
+                <form class="mobile-search-form">
+                    <input type="search" placeholder="Search...">
+                    <button type="submit"><i class="fas fa-search"></i></button>
+                </form>
+            </li>
+        </ul>
+    </nav>
+ 
+    <main>
+        <section class="hero hero-1">
+            <div class="container hero-content">
+                <div class="hero-text"> <h1>Science, Connected.</h1>
+                    <p>Empowering global collaboration, one discovery at a time.</p>
+                    <div class="cta-buttons">
+                        <a href="Marketplace.html" class="btn btn-primary">Explore Marketplace</a>
+                        <a href="Threads.html" class="btn btn-secondary">Join a Thread</a>
+                    </div>
+                </div>
+                <div class="hero-image placeholder"> <span>HERO IMAGE</span>
+                </div>
+            </div>
+        </section>
+ 
+        <section class="global-lab">
+            <div class="container">
+                <div class="lab-text">
+                    <h2>The Global Laboratory at Your Fingertips</h2> <p>Create, collaborate, and share with scientists worldwide.</p>
+                </div>
+                <div class="how-it-works">
+                    <div class="feature-box"> <i class="fas fa-magnifying-glass-chart feature-icon"></i>
+                        <h3>Find</h3>
+                        <p>Discover equipment or collaborators</p>
+                    </div>
+                    <div class="feature-box"> <i class="fas fa-users feature-icon"></i>
+                        <h3>Collaborate</h3>
+                        <p>Work together globally</p>
+                    </div>
+                    <div class="feature-box"> <i class="fas fa-book-open-reader feature-icon"></i>
+                        <h3>Research hub</h3>
+                        <p>Browse and share publications</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+ 
+        <section class="hero hero-2">
+            <div class="container">
+                 <div class="hero-image placeholder large"> <span>HERO IMAGE</span>
+                </div>
+            </div>
+        </section>
+ 
+        <section class="marketplace">
+            <div class="container">
+                <h2>A Marketplace for Science</h2> <div class="item-grid">
+                    <div class="item-card"> <div class="item-image placeholder small"></div>
+                        <p>X equipment at X university</p>
+                        <p class="price">$X /h</p>
+                    </div>
+                    <div class="item-card"> <div class="item-image placeholder small"></div>
+                        <p>X equipment at X university</p>
+                        <p class="price">$X /h</p>
+                    </div>
+                    <div class="item-card"> <div class="item-image placeholder small"></div>
+                        <p>X equipment at X university</p>
+                        <p class="price">$X /h</p>
+                    </div>
+                    <div class="item-card"> <div class="item-image placeholder small"></div>
+                        <p>X equipment at X university</p>
+                        <p class="price">$X /h</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+ 
+        <section class="footer-cta" style="background-color: #23272f; color: #f4f4f4;">
+            <div class="container">
+                <p>"Science has no borders. Neither should opportunity."</p>
+                <a href="#about-us" class="btn btn-secondary">About us</a>
+            </div>
+        </section>
+    </main>
+ 
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 SPIRA. All rights reserved.</p> </div>
+    </footer>
+ 
+    <div id="overlay" class="overlay"></div>
+    <aside id="user-profile-sidebar" class="sidebar">
+        <button id="close-sidebar-button" class="close-btn" aria-label="Close Profile"><i class="fas fa-times"></i></button>
+ 
+        <div class="profile-header">
+            <div class="profile-pic placeholder round"></div>
+            <h3>Username</h3>
+            <p class="bio">About me: Short bio placeholder text here...</p>
+        </div>
+ 
+        <div class="profile-stats" style="justify-content: space-around;">
+            <div><span>X</span><span class="label">Rented</span></div>
+            <div><span>X</span><span class="label">Listed</span></div>
+        </div>
+ 
+        <div class="profile-actions" style="margin-top: 30px;">
+            <button><i class="fas fa-sign-out-alt"></i> Log out</button>
+        </div>
+    </aside>
+    <div id="settings-sidebar" class="sidebar" style="right:-380px; z-index:2100;">
+        <button id="close-settings-btn" class="close-btn" aria-label="Close Settings"><i class="fas fa-times"></i></button>
+        <div class="settings-header">
+            <h3>Settings</h3>
+        </div>
+        <div class="settings-section">
+            <label><input type="checkbox" id="show-footer-cta" checked> Show Footer Quote</label>
+        </div>
+    </div>
+ 
+    <div id="sign-in-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.7); z-index:3000; align-items:center; justify-content:center;">
+        <div style="background:#23272f; color:#f4f4f4; border-radius:10px; padding:40px 32px; min-width:320px; max-width:90vw; box-shadow:0 4px 24px #000; display:flex; flex-direction:column; align-items:center;">
+            <h2 style="color:#34ace0; margin-bottom:18px;">Sign In</h2>
+            <button id="gmail-signin" style="margin-bottom:16px; padding:10px 24px; background:#fff; color:#23272f; border:none; border-radius:4px; font-weight:600; cursor:pointer; width:100%;">Sign in with Gmail</button>
+            <div style="margin:12px 0; color:#aaa;">or</div>
+            <input id="phone-input" type="tel" placeholder="Phone number" style="padding:8px; border-radius:4px; border:1px solid #444; background:#2c2f36; color:#f4f4f4; width:100%; margin-bottom:12px;">
+            <button id="phone-signin" style="padding:10px 24px; background:#34ace0; color:#fff; border:none; border-radius:4px; font-weight:600; cursor:pointer; width:100%;">Sign in with Phone</button>
+            <button id="close-signin" style="margin-top:18px; background:none; color:#aaa; border:none; cursor:pointer;">Cancel</button>
+        </div>
+    </div>
+ 
+    <section id="about-us" style="background: #23272f; color: #f4f4f4; padding: 60px 0;">
+        <div class="container" style="max-width: 800px;">
+            <h2 style="color: #34ace0;">About Us</h2>
+            <p style="font-size: 1.15em; margin-bottom: 24px;">SPIRA is dedicated to connecting scientists, researchers, and institutions worldwide, breaking down barriers to collaboration and discovery. Our platform empowers users to share resources, ideas, and opportunities in a seamless, global environment.</p>
+            <div style="margin-top: 32px;">
+                <h3 style="color: #b0b0ff;">Founder</h3>
+                <div style="display: flex; align-items: center; gap: 18px;">
+                    <div style="width: 70px; height: 70px; border-radius: 50%; background: #2c2f36; display: flex; align-items: center; justify-content: center; font-size: 2.2em; color: #34ace0; font-weight: bold;">NP</div>
+                    <div>
+                        <div style="font-size: 1.1em; font-weight: 600; color: #f4f4f4;">Nakul Paveri</div>
+                        <div style="color: #aaa;">Founder</div>
+                    </div>
+                </div>
+                <div style="margin-top: 32px; text-align:center;">
+                    <a href="about.html" class="btn btn-primary" style="margin-top:24px;">Meet the Team</a>
+                </div>
+            </div>
+        </div>
+    </section>
+ 
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const userProfileButton = document.getElementById('user-profile-button');
+            const sidebar = document.getElementById('user-profile-sidebar');
+            const closeSidebarButton = document.getElementById('close-sidebar-button');
+            const overlay = document.getElementById('overlay');
+            const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+            const mobileNav = document.querySelector('.mobile-nav');
+            let isSignedIn = false;
+            const signInModal = document.getElementById('sign-in-modal');
+            const closeSignInBtn = document.getElementById('close-signin');
+            const gmailSigninBtn = document.getElementById('gmail-signin');
+            const phoneSigninBtn = document.getElementById('phone-signin');
+            const phoneInput = document.getElementById('phone-input');
+            const signInBtn = document.getElementById('sign-in-btn');
+ 
+            // --- Sidebar Functionality ---
+            function openSidebar() {
+                if (isSignedIn) {
+                    sidebar.classList.add('active');
+                    overlay.classList.add('active');
+                    document.body.style.overflowY = 'hidden';
+                }
+            }
+ 
+            function closeSidebar() {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+                document.body.style.overflowY = '';
+            }
+ 
+            if (userProfileButton && sidebar && closeSidebarButton && overlay) {
+                userProfileButton.addEventListener('click', function() {
+                    if (!isSignedIn) {
+                        openSignInModal();
+                    } else {
+                        openSidebar();
+                    }
+                });
+                closeSidebarButton.addEventListener('click', closeSidebar);
+                overlay.addEventListener('click', closeSidebar);
+ 
+                document.addEventListener('keydown', (event) => {
+                    if (event.key === 'Escape' && sidebar.classList.contains('active')) {
+                        closeSidebar();
+                    }
+                });
+            } else {
+                console.error("Sidebar elements not found!");
+            }
+ 
+            // --- Mobile Menu Functionality ---
+             if (mobileMenuToggle && mobileNav) {
+                mobileMenuToggle.addEventListener('click', () => {
+                    mobileNav.classList.toggle('active');
+                    const icon = mobileMenuToggle.querySelector('i');
+                    if (mobileNav.classList.contains('active')) {
+                        icon.classList.remove('fa-bars');
+                        icon.classList.add('fa-times');
+                        mobileMenuToggle.setAttribute('aria-label', 'Close Menu');
+                    } else {
+                        icon.classList.remove('fa-times');
+                        icon.classList.add('fa-bars');
+                         mobileMenuToggle.setAttribute('aria-label', 'Toggle Menu');
+                    }
+                });
+ 
+                // Close mobile menu if user clicks a link inside it (optional)
+                mobileNav.querySelectorAll('a').forEach(link => {
+                    link.addEventListener('click', () => {
+                        if (mobileNav.classList.contains('active')) {
+                            mobileNav.classList.remove('active');
+                            mobileMenuToggle.querySelector('i').classList.remove('fa-times');
+                            mobileMenuToggle.querySelector('i').classList.add('fa-bars');
+                            mobileMenuToggle.setAttribute('aria-label', 'Toggle Menu');
+                        }
+                    });
+                });
+ 
+            } else {
+                 console.error("Mobile menu elements not found!");
+            }
+ 
+            // --- Cool Scroll Animations (Example using Intersection Observer) ---
+            const animatedElements = document.querySelectorAll('.feature-box, .item-card, .hero-text, .hero-image, .lab-text h2, .marketplace h2');
+ 
+            // Check if IntersectionObserver is supported
+            if ('IntersectionObserver' in window) {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            // Add a class to trigger animation (defined in CSS)
+                            entry.target.classList.add('visible');
+                            // Optional: Stop observing once visible to prevent re-animation
+                             observer.unobserve(entry.target);
+                        }
+                    });
+                }, {
+                    threshold: 0.1 // Trigger when 10% of the element is visible
+                });
+ 
+                animatedElements.forEach(el => {
+                    // Add the base class needed for the animation styles
+                    el.classList.add('animate-on-scroll');
+                    observer.observe(el);
+                });
+            } else {
+                // Fallback for older browsers: just make elements visible immediately
+                console.log("IntersectionObserver not supported, animations disabled.");
+                animatedElements.forEach(el => {
+                     el.classList.add('visible'); 
+                });
+            }
+ 
+            // Settings sidebar logic
+            const settingsBtn = document.getElementById('settings-btn');
+            const settingsSidebar = document.getElementById('settings-sidebar');
+            const closeSettingsBtn = document.getElementById('close-settings-btn');
+            settingsBtn.addEventListener('click', function() {
+                settingsSidebar.style.transform = 'translateX(-380px)';
+                settingsSidebar.classList.add('active');
+                document.getElementById('overlay').classList.add('active');
+                document.body.style.overflowY = 'hidden';
+            });
+            closeSettingsBtn.addEventListener('click', function() {
+                settingsSidebar.style.transform = '';
+                settingsSidebar.classList.remove('active');
+                document.getElementById('overlay').classList.remove('active');
+                document.body.style.overflowY = '';
+            });
+            document.getElementById('overlay').addEventListener('click', function() {
+                settingsSidebar.style.transform = '';
+                settingsSidebar.classList.remove('active');
+                document.getElementById('overlay').classList.remove('active');
+                document.body.style.overflowY = '';
+            });
+ 
+            // Footer CTA control
+            document.getElementById('show-footer-cta').addEventListener('change', function() {
+                document.querySelector('.footer-cta').style.display = this.checked ? '' : 'none';
+            });
+ 
+            function updateAuthUI() {
+                if (isSignedIn) {
+                    signInBtn.style.display = 'none';
+                    userProfileButton.style.display = '';
+                } else {
+                    signInBtn.style.display = '';
+                    userProfileButton.style.display = 'none';
+                }
+            }
+            updateAuthUI();
+            signInBtn.addEventListener('click', function() {
+                window.location.href = 'SignIn.html';
+            });
+            // After successful sign-in:
+            gmailSigninBtn.addEventListener('click', function() {
+                isSignedIn = true;
+                closeSignInModal();
+                updateAuthUI();
+                openSidebar();
+            });
+            phoneSigninBtn.addEventListener('click', function() {
+                if (phoneInput.value.trim().length >= 8) {
+                    isSignedIn = true;
+                    closeSignInModal();
+                    updateAuthUI();
+                    openSidebar();
+                } else {
+                    phoneInput.style.borderColor = '#e74c3c';
+                    phoneInput.placeholder = 'Enter a valid phone number';
+                }
+            });
+        });
+    </script>
+ 
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }} - SPIRA</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/forms.css') }}">
+    <style>
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; margin-bottom: .5rem; font-weight: 600; color: #34ace0;}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="signin-box">
+            <h2>Register New Equipment</h2>
+            <form action="" method="post" novalidate enctype="multipart/form-data">
+                {{ form.hidden_tag() }}
+
+                <div class="form-group">
+                    {{ form.name.label }}
+                    {{ form.name(class="form-control") }}
+                </div>
+                 <div class="form-group">
+                    {{ form.category.label }}
+                    {{ form.category(class="form-control") }}
+                </div>
+                <div class="form-group">
+                    {{ form.description.label }}
+                    {{ form.description(class="form-control", rows=4) }}
+                </div>
+                <hr>
+                <div class="form-group">
+                    {{ form.model_number.label }}
+                    {{ form.model_number(class="form-control") }}
+                </div>
+                <div class="form-group">
+                    {{ form.manufacturer.label }}
+                    {{ form.manufacturer(class="form-control") }}
+                </div>
+                <hr>
+                <div class="form-group">
+                    {{ form.safety_requirements.label }}
+                    {{ form.safety_requirements(class="form-control", rows=4) }}
+                </div>
+                <div class="form-group">
+                    {{ form.cost_onsite.label }}
+                    {{ form.cost_onsite(class="form-control") }}
+                </div>
+                <div class="form-group">
+                    {{ form.cost_remote.label }}
+                    {{ form.cost_remote(class="form-control") }}
+                </div>
+                <hr>
+                <h3>Upload Files</h3>
+                <div class="form-group">
+                    {{ form.primary_image.label }}<br>
+                    {{ form.primary_image }}
+                </div>
+                <div class="form-group">
+                    {{ form.secondary_images.label }}<br>
+                    {{ form.secondary_images }}
+                </div>
+                 <div class="form-group">
+                    {{ form.tech_specs_pdf.label }}<br>
+                    {{ form.tech_specs_pdf }}
+                </div>
+                 <div class="form-group">
+                    {{ form.instruction_manual_pdf.label }}<br>
+                    {{ form.instruction_manual_pdf }}
+                </div>
+                 <div class="form-group">
+                    {{ form.terms_pdf.label }}<br>
+                    {{ form.terms_pdf }}
+                </div>
+
+                <p>{{ form.submit(class="btn btn-primary") }}</p>
+            </form>
+             <a href="{{ url_for('market') }}">Back to Marketplace</a>
+        </div>
+    </div>
+</body>
+</html>
