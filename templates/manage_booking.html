@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container" style="color: #333; background: #fff; padding: 2rem; border-radius: 8px; margin-top: 2rem; max-width: 800px;">
+    <h2>Manage Booking Request</h2>
+    <hr>
+
+    <h4>Request Details</h4>
+    <p><strong>Equipment:</strong> {{ booking.equipment.name }}</p>
+    <p><strong>Renter:</strong> {{ booking.renter.username }} ({{ booking.renter.email }})</p>
+    <p><strong>Request Date:</strong> {{ booking.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+    <p><strong>Current Status:</strong> <span style="font-weight: bold;">{{ booking.status }}</span></p>
+
+    <h5>Experiment Description</h5>
+    <pre style="background: #f4f4f4; padding: 1rem; border-radius: 5px; white-space: pre-wrap; border: 1px solid #ddd;">{{ booking.experiment_description }}</pre>
+
+    <h5>Samples List</h5>
+    <pre style="background: #f4f4f4; padding: 1rem; border-radius: 5px; white-space: pre-wrap; border: 1px solid #ddd;">{{ booking.samples_list or 'No samples listed.' }}</pre>
+
+    <hr style="margin-top: 2rem;">
+
+    <h4>Update Booking</h4>
+    <form action="" method="post" novalidate>
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+            {{ form.status.label }}<br>
+            {{ form.status() }}
+        </div>
+        <div class="form-group">
+            {{ form.final_cost.label }}<br>
+            {{ form.final_cost(placeholder="e.g., 150.50") }}
+        </div>
+        <div class="form-group">
+            {{ form.university_notes.label }}<br>
+            {{ form.university_notes(placeholder="Add any notes for the renter...") }}
+        </div>
+        <p>{{ form.submit(class="btn btn-primary") }}</p>
+    </form>
+
+    <a href="{{ url_for('my_equipment') }}" style="margin-top: 20px; display: inline-block;">← Back to My Equipment</a>
+</div>
+{% endblock %}

@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, RadioField, SelectField, TextAreaField, FloatField
-from wtforms.validators import DataRequired, Email, EqualTo, ValidationError
+from wtforms.validators import DataRequired, Email, EqualTo, ValidationError, Optional
 from flask_wtf.file import FileField, FileAllowed, MultipleFileField
 from models import User
 from wtforms import TextAreaField
@@ -65,3 +65,12 @@ class RentalRequestForm(FlaskForm):
     experiment_description = TextAreaField('Experiment Description', validators=[DataRequired()], render_kw={"rows": 6, "placeholder": "Describe your experiment, methodology, and objectives..."})
     samples_list = TextAreaField('Required Samples', render_kw={"rows": 4, "placeholder": "List each sample on a new line..."})
     submit = SubmitField('Submit Request')
+
+class UniversityApprovalForm(FlaskForm):
+    final_cost = FloatField('Final Cost (if different from estimate)', validators=[Optional()])
+    university_notes = TextAreaField('Notes for Renter', render_kw={"rows": 4})
+    status = SelectField('Update Status', choices=[
+        ('Approved', 'Approve'),
+        ('Rejected', 'Reject')
+    ], validators=[DataRequired()])
+    submit = SubmitField('Update Booking')

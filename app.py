@@ -3,10 +3,10 @@ import json
 from flask import Flask, render_template, redirect, url_for, flash, request
 from werkzeug.utils import secure_filename
 from config import Config
-from models import db, User, Equipment, Booking
+from models import db, User, Equipment, Booking 
 # --- Import login_required and the new form ---
 from flask_login import LoginManager, current_user, login_user, logout_user, login_required
-from forms import LoginForm, RegistrationForm, EquipmentForm, RentalRequestForm # Added EquipmentForm
+from forms import LoginForm, RegistrationForm, EquipmentForm, RentalRequestForm, UniversityApprovalForm
 from authlib.integrations.flask_client import OAuth
 
 app = Flask(__name__)
@@ -216,7 +216,7 @@ def my_equipment():
     # Fetch equipment listed by the currently logged-in university
     university_equipment = Equipment.query.filter_by(university_id=current_user.id).all()
     bookings = Booking.query.join(Equipment).filter(Equipment.university_id == current_user.id).order_by(Booking.created_at.desc()).all()
-    return render_template('equip_list.html', title='My Equipment', equipment_list=university_equipment)
+    return render_template('equip_list.html', title='My Equipment', equipment_list=university_equipment, bookings=bookings)
 
 @app.route('/equipment/<int:equipment_id>/request', methods=['GET', 'POST'])
 @login_required
@@ -242,6 +242,32 @@ def request_equipment(equipment_id):
     # We will use purchase.html for this page
     return render_template('purchase.html', title='Request Equipment', form=form, equipment=equipment)
 
+@app.route('/booking/<int:booking_id>/manage', methods=['GET', 'POST'])
+@login_required
+def manage_booking(booking_id):
+    booking = Booking.query.get_or_404(booking_id)
+    # Security check: ensure the current user is the university that owns the equipment
+    if not current_user.is_university or booking.equipment.university_id != current_user.id:
+        flash('You do not have permission to manage this booking.')
+        return redirect(url_for('my_equipment'))
+
+    form = UniversityApprovalForm()
+    if form.validate_on_submit():
+        booking.status = form.status.data
+        if form.final_cost.data is not None:
+            booking.final_cost = form.final_cost.data
+        if form.university_notes.data:
+            booking.university_notes = form.university_notes.data
+        
+        db.session.commit()
+        flash('Booking has been updated successfully.')
+        return redirect(url_for('my_equipment'))
+
+    # Pre-populate form on GET request
+    form.university_notes.data = booking.university_notes
+    form.final_cost.data = booking.final_cost
+
+    return render_template('manage_booking.html', title='Manage Booking', form=form, booking=booking)
 
 @app.route('/my_orders')
 @login_required

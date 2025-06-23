@@ -14,6 +14,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
     is_university = db.Column(db.Boolean, default=False)
     equipment= db.relationship('Equipment', back_populates='university', lazy='dynamic')
+    bookings = db.relationship('Booking', foreign_keys='Booking.user_id', back_populates='renter', lazy='dynamic')
 
     # New method to hash the password
     def set_password(self, password):
@@ -48,6 +49,7 @@ class Equipment(db.Model):
     # Foreign Key to link to the User (University)
     university_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     university = db.relationship('User', back_populates='equipment')
+    
 
 class Booking(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -72,5 +74,5 @@ class Booking(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     # Relationships
-    renter = db.relationship('User', backref='bookings')
+    renter = db.relationship('User', back_populates='bookings')
     equipment = db.relationship('Equipment', backref='bookings')

@@ -289,7 +289,7 @@
                                     <strong>Request for:</strong> {{ booking.equipment.name }} <br>
                                     <strong>From:</strong> {{ booking.renter.username }} <br>
                                     <strong>Status:</strong> {{ booking.status }}
-                                    <a href="#" style="float: right; padding: 5px 10px; background: #4a47a3; color: white; text-decoration: none; border-radius: 4px;">View</a>
+                                    <a href="{{ url_for('manage_booking', booking_id=booking.id) }}" style="float: right; padding: 5px 10px; background: #4a47a3; color: white; text-decoration: none; border-radius: 4px;">View & Manage</a>
                                 </p>
                             </div>
                         {% endfor %}
