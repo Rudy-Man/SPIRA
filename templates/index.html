@@ -14,13 +14,11 @@
  
     <header>
         <div class="container">
-            <a href="{{ url_for('index') }}" class="logo">
-                <i class="fas fa-flask-vial logo-icon"></i> SPIRA
-            </a>
+            <a href="{{ url_for('index') }}" class="logo"> <i class="fas fa-flask-vial logo-icon"></i> SPIRA </a>
             <nav>
                 <ul>
                     <li><a href="{{ url_for('market') }}">Marketplace</a></li>
-                    <li><a href="#">Threads</a></li>
+                    <li><a href="{{ url_for('threads') }}">Threads</a></li>
                 </ul>
             </nav>
             <div class="header-right">
@@ -33,6 +31,8 @@
                     
                     {% if current_user.is_university %}
                         <a href="{{ url_for('register_equipment') }}" class="btn btn-secondary">List Equipment</a>
+                        {# Add a link for university users to go back to their equipment list #}
+                        <a href="{{ url_for('my_equipment') }}" class="btn btn-secondary" style="margin-left: 10px;">My Equipment Dashboard</a>
                     {% endif %}
 
                     <a href="{{ url_for('logout') }}" class="btn btn-primary">Log Out</a>
@@ -50,7 +50,7 @@
      <nav class="mobile-nav">
          <ul>
             <li><a href="{{ url_for('market') }}">Marketplace</a></li>
-            <li><a href="#">Threads</a></li>
+            <li><a href="{{ url_for('threads') }}">Threads</a></li>
             <li>
                 <form class="mobile-search-form">
                     <input type="search" placeholder="Search...">
@@ -67,7 +67,7 @@
                     <p>Empowering global collaboration, one discovery at a time.</p>
                     <div class="cta-buttons">
                         <a href="{{ url_for('market') }}" class="btn btn-primary">Explore Marketplace</a>
-                        <a href="#" class="btn btn-secondary">Join a Thread</a>
+                        <a href="{{ url_for('threads') }}" class="btn btn-secondary">Join a Thread</a>
                     </div>
                 </div>
                 <div class="hero-image placeholder"> <span>HERO IMAGE</span>
@@ -130,7 +130,7 @@
         <section class="footer-cta" style="background-color: #23272f; color: #f4f4f4;">
             <div class="container">
                 <p>"Science has no borders. Neither should opportunity."</p>
-                <a href="#about-us" class="btn btn-secondary">About us</a>
+                <a href="{{ url_for('about') }}" class="btn btn-secondary">About us</a>
             </div>
         </section>
     </main>

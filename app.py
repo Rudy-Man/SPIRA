@@ -40,6 +40,14 @@ oauth.register(
 def index():
     return render_template('index.html')
 
+@app.route('/threads')
+def threads():
+    return render_template('threads.html', title='Threads')
+
+@app.route('/about')
+def about():
+    return render_template('about.html', title='About Us')
+
 # LIGO-new/app.py
 
 @app.route('/login', methods=['GET', 'POST'])

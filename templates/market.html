@@ -31,6 +31,17 @@
         }
         .logo { font-size: 1.6rem; font-weight: bold; color: var(--primary-color); display: flex; align-items: center; gap: 8px; }
         .logo i { color: var(--accent-color); }
+        .logo .logo-anchor {
+            text-decoration: none;
+            color: inherit; /* Inherits from .logo */
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: color 0.2s ease-in-out;
+        }
+        .logo .logo-anchor:hover {
+            color: var(--secondary-color);
+        }
         .marketplace-link { color: var(--primary-color); font-weight: 600; margin-left: 18px; text-decoration: underline; }
         .search-bar-header { display: flex; align-items: center; background: var(--light-gray); border-radius: 20px; padding: 4px 12px; }
         .search-bar-header input { border: none; background: transparent; outline: none; font-size: 1rem; padding: 6px 8px; color: var(--text-color); }
@@ -76,16 +87,21 @@
 </head>
 <body>
     <div class="header-bar">
-        <div class="logo"><i class="fas fa-puzzle-piece"></i> SPIRA <a href="#" class="marketplace-link">Marketplace</a></div>
+        <div class="logo">
+            <a href="{{ url_for('index') }}" class="logo-anchor">
+                <i class="fas fa-flask-vial logo-icon"></i> SPIRA
+            </a>
+            <a href="{{ url_for('market') }}" class="marketplace-link">Marketplace</a>
+        </div>
         <div class="search-bar-header">
             <input type="text" placeholder="Search...">
             <i class="fas fa-search"></i>
         </div>
-        <i class="fas fa-user-circle profile-icon"></i>
-        <a href="Listing.html" class="btn btn-secondary" style="font-size: 1rem; padding: 8px 18px; margin-left: 18px;">List Your Equipment</a>
+        <i class="fas fa-user-circle profile-icon"></i> 
+        <a href="{{ url_for('register_equipment') }}" class="btn btn-secondary" style="font-size: 1rem; padding: 8px 18px; margin-left: 18px;">List Your Equipment</a>
     </div>
     <div class="main-flex">
-        <aside class="sidebar">
+        <aside class="sidebar"> 
             <button class="filter-btn">Filters</button>
             <div class="filter-section">
                 <label class="filter-label">Location</label>
@@ -107,7 +123,7 @@
             </div>
         </aside>
         <main class="main-content">
-            <a href="ligo.html" class="btn btn-secondary" style="margin-bottom: 18px; display: inline-block;">&larr; Back to Home</a>
+            <a href="{{ url_for('index') }}" class="btn btn-secondary" style="margin-bottom: 18px; display: inline-block;">&larr; Back to Home</a>
             <div class="marketplace-title-row">
                 <span class="marketplace-title">SCIENCE MARKETPLACE</span>
                 <span class="sort-by">sort by <select><option>Relevance</option><option>Price</option><option>Rating</option></select></span>

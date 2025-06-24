@@ -35,9 +35,9 @@
         <div class="header">
             <h2>Threads</h2>
             <nav class="nav">
-                <a href="ligo.html">Home</a>
-                <a href="Marketplace.html">Marketplace</a>
-                <a href="Threads.html" class="active">Threads</a>
+                <a href="{{ url_for('index') }}">Home</a>
+                <a href="{{ url_for('market') }}">Marketplace</a>
+                <a href="{{ url_for('threads') }}" class="active">Threads</a>
             </nav>
         </div>
         <form class="new-thread-form">
