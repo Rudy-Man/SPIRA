@@ -1,82 +1,418 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>{{ title }} - SPIRA</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/forms.css') }}">
-    <style>
-        .form-group { margin-bottom: 1rem; }
-        label { display: block; margin-bottom: .5rem; font-weight: 600; color: #34ace0;}
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="signin-box">
-            <h2>Register New Equipment</h2>
-            <form action="" method="post" novalidate enctype="multipart/form-data">
-                {{ form.hidden_tag() }}
+{% extends "base.html" %}
 
+{% block head_content %}
+    <style>
+        :root {
+            --primary-color: #4a47a3;
+            --secondary-color: #706fd3;
+            --accent-color: #34ace0;
+            --text-color: #23272f; /* Using dark text for white background sections */
+            --bg-color: #23272f; /* Dark background for body */
+            --light-gray: #2c2f36; /* Darker grey for some elements */
+            --white: #fff;
+            --border-color: #444; /* Dark border for dark theme */
+            --section-bg: #fff; /* White background for main content sections */
+            --section-border: #e6e8fa; /* Light border for white theme sections */
+        }
+        /* Body styles are inherited from base.html, but these are for the specific container */
+        .container.multi-step-form {
+            max-width: 90%;
+            margin: 40px auto;
+            background: var(--section-bg); /* White background for the main container */
+            border: 2px solid var(--section-border);
+            border-radius: 10px;
+            box-shadow: 0 2px 12px rgba(44,47,54,0.07);
+            display: flex;
+            flex-direction: row; /* Ensure sidebar is on the left */
+            min-height: 600px;
+            padding: 0 10px; /* Add horizontal padding */ /* Removed padding-right to allow main-step-content to fill */
+            /* Ensure no padding on the right to allow main-step-content to fill */
+            padding-right: 0;
+        }
+        .steps-sidebar {
+            background: var(--light-gray);
+            border-right: 2px solid var(--border-color);
+            padding: 32px 0; /* Restore vertical padding for content spacing */
+            /* Removed justify-content: space-between; as gap and margin-top:auto handle spacing */
+            width: 120px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border-top-left-radius: 8px; /* Match container's border-radius */
+            border-bottom-left-radius: 8px; /* Match container's border-radius */
+            gap: 18px;
+        }
+        .step-btn {
+            width: 80px;
+            padding: 10px 0;
+            background: var(--white);
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+            text-align: center;
+        }
+        .step-btn.active, .step-btn:focus {
+            background: var(--primary-color);
+            color: var(--white);
+        }
+        .main-step-content {
+            flex: 1;
+            padding: 40px 32px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            border-top-right-radius: 8px; /* Match container's border-radius */
+            border-bottom-right-radius: 8px; /* Match container's border-radius */
+            color: var(--text-color); /* Ensure text is readable on white background */
+        }
+        .step-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        .form-group {
+            width: 100%;
+            max-width: 450px;
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+        }
+        .form-group input[type="text"],
+        .form-group textarea,
+        .form-group select,
+        .form-group input[type="number"] { /* Added for cost fields */
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 1rem;
+            color: var(--text-color);
+            background-color: var(--white);
+        }
+        .form-group textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+        .upload-box { /* Not used in final HTML, but good to keep if needed */
+            border: 2px dashed var(--primary-color);
+            border-radius: 6px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            margin-bottom: 20px;
+            color: var(--secondary-color);
+        }
+        .upload-box i { font-size: 3rem; margin-bottom: 10px; }
+        .upload-box input[type="file"] { display: none; }
+
+        .upload-area {
+            border: 2px dashed var(--primary-color);
+            border-radius: 6px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--secondary-color);
+            cursor: pointer;
+        }
+        .upload-area.small { min-height: 80px; }
+
+        .hidden-file-input { /* Class to hide the actual WTForms file input */
+            display: none;
+        }
+
+        .file-upload-btn {
+            background: var(--primary-color);
+            color: var(--white);
+            border: none;
+            border-radius: 4px;
+            padding: 8px 18px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        .file-upload-btn:hover { background: var(--secondary-color); }
+
+        .cost-inputs .form-group {
+            width: calc(50% - 10px); /* Adjust width for two columns */
+            display: inline-block;
+            margin-right: 20px;
+            vertical-align: top;
+        }
+        .cost-inputs .form-group:last-child { margin-right: 0; }
+
+        .cost-inputs .form-group label {
+            margin-bottom: 4px;
+        }
+        .cost-inputs .form-group input {
+            width: 100%; /* Make input fill the column */
+        }
+
+        .submit-btn, .finish-btn { /* Combined styles for next/finish buttons */
+            background: var(--accent-color);
+            color: var(--white);
+            border: none;
+            border-radius: 4px;
+            padding: 12px 40px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background 0.2s, opacity 0.2s;
+        }
+        .submit-btn:hover, .finish-btn:hover {
+            background: #34ace0;
+            opacity: 0.9;
+        }
+
+        /* Back to Marketplace button styling */
+        .back-to-market-btn {
+            width: auto;
+            padding: 10px 15px;
+            margin-top: auto; /* Pushes it to the bottom of the sidebar */
+            background: var(--primary-color);
+            color: var(--white);
+            border: 2px solid var(--primary-color);
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+            text-align: center;
+            text-decoration: none; /* Remove underline */
+        }
+        .back-to-market-btn:hover {
+            background: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+
+        /* Error message styling for WTForms */
+        .error {
+            color: #e74c3c;
+            font-size: 0.9rem;
+            display: block;
+            margin-top: 5px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="container multi-step-form">
+    <div class="steps-sidebar">
+        <button class="step-btn active" data-step="1">Step 1</button>
+        <button class="step-btn" data-step="2">Step 2</button>
+        <button class="step-btn" data-step="3">Step 3</button>
+        <button class="step-btn" data-step="4">Step 4</button>
+        <a href="{{ url_for('market') }}" class="back-to-market-btn">Back to Marketplace</a>
+    </div>
+    <div class="main-step-content" id="step-content">
+        <form action="" method="post" novalidate enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+
+            <!-- Step 1: Add name, category, description, primary image -->
+            <div id="step1" class="step-pane">
+                <div class="step-title">Add Equipment Details</div>
                 <div class="form-group">
                     {{ form.name.label }}
-                    {{ form.name(class="form-control") }}
+                    {{ form.name(class="form-control", placeholder="Enter equipment name...") }}
+                    {% for error in form.name.errors %}<span class="error">[{{ error }}]</span>{% endfor %}
                 </div>
-                 <div class="form-group">
+                <div class="form-group">
                     {{ form.category.label }}
                     {{ form.category(class="form-control") }}
+                    {% for error in form.category.errors %}<span class="error">[{{ error }}]</span>{% endfor %}
+                </div>
+                <div class="form-group">
+                    {{ form.primary_image.label }}
+                    <div class="upload-area small" data-target-id="{{ form.primary_image.id }}">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <span>Click to upload</span>
+                        {{ form.primary_image(class="hidden-file-input") }}
+                    </div>
+                    {% for error in form.primary_image.errors %}<span class="error">[{{ error }}]</span>{% endfor %}
                 </div>
                 <div class="form-group">
                     {{ form.description.label }}
-                    {{ form.description(class="form-control", rows=4) }}
+                    {{ form.description(class="form-control", rows=4, placeholder="Describe the equipment...") }}
+                    {% for error in form.description.errors %}<span class="error">[{{ error }}]</span>{% endfor %}
                 </div>
-                <hr>
+                <button type="button" class="submit-btn" onclick="goToStep(2)">Next</button>
+            </div>
+
+            <!-- Step 2: Model, Manufacturer, Secondary Images, PDFs -->
+            <div id="step2" class="step-pane" style="display:none;">
+                <div class="step-title">More Equipment Details</div>
                 <div class="form-group">
                     {{ form.model_number.label }}
-                    {{ form.model_number(class="form-control") }}
+                    {{ form.model_number(class="form-control", placeholder="Enter model number...") }}
+                    {% for error in form.model_number.errors %}<span class="error">[{{ error }}]</span>{% endfor %}
                 </div>
                 <div class="form-group">
                     {{ form.manufacturer.label }}
-                    {{ form.manufacturer(class="form-control") }}
+                    {{ form.manufacturer(class="form-control", placeholder="Enter manufacturer...") }}
+                    {% for error in form.manufacturer.errors %}<span class="error">[{{ error }}]</span>{% endfor %}
                 </div>
-                <hr>
+                <div class="form-group">
+                    {{ form.secondary_images.label }}
+                    <div class="upload-area" data-target-id="{{ form.secondary_images.id }}">
+                        <i class="fas fa-images"></i>
+                        <span>Click to upload (max 4)</span>
+                        {{ form.secondary_images(class="hidden-file-input", multiple=True) }}
+                    </div>
+                    {% for error in form.secondary_images.errors %}<span class="error">[{{ error }}]</span>{% endfor %}
+                </div>
+                <div class="form-group">
+                    <label>Upload Documents</label>
+                    <button type="button" class="file-upload-btn" data-target-id="{{ form.tech_specs_pdf.id }}" data-original-text="Upload Technical Specs">Upload Technical Specs</button>
+                    {{ form.tech_specs_pdf(class="hidden-file-input") }}
+                    {% for error in form.tech_specs_pdf.errors %}<span class="error">[{{ error }}]</span>{% endfor %}
+
+                    <button type="button" class="file-upload-btn" data-target-id="{{ form.instruction_manual_pdf.id }}" data-original-text="Upload Instruction Manual">Upload Instruction Manual</button>
+                    {{ form.instruction_manual_pdf(class="hidden-file-input") }}
+                    {% for error in form.instruction_manual_pdf.errors %}<span class="error">[{{ error }}]</span>{% endfor %}
+
+                    <button type="button" class="file-upload-btn" data-target-id="{{ form.terms_pdf.id }}" data-original-text="Upload Terms and Conditions">Upload Terms and Conditions</button>
+                    {{ form.terms_pdf(class="hidden-file-input") }}
+                    {% for error in form.terms_pdf.errors %}<span class="error">[{{ error }}]</span>{% endfor %}
+                </div>
+                <button type="button" class="submit-btn" onclick="goToStep(3)">Next</button>
+            </div>
+
+            <!-- Step 3: Safety Requirements -->
+            <div id="step3" class="step-pane" style="display:none;">
+                <div class="step-title">Safety Requirements</div>
                 <div class="form-group">
                     {{ form.safety_requirements.label }}
-                    {{ form.safety_requirements(class="form-control", rows=4) }}
+                    {{ form.safety_requirements(class="form-control", rows=4, placeholder="Describe safety requirements...") }}
+                    {% for error in form.safety_requirements.errors %}<span class="error">[{{ error }}]</span>{% endfor %}
                 </div>
-                <div class="form-group">
-                    {{ form.cost_onsite.label }}
-                    {{ form.cost_onsite(class="form-control") }}
-                </div>
-                <div class="form-group">
-                    {{ form.cost_remote.label }}
-                    {{ form.cost_remote(class="form-control") }}
-                </div>
-                <hr>
-                <h3>Upload Files</h3>
-                <div class="form-group">
-                    {{ form.primary_image.label }}<br>
-                    {{ form.primary_image }}
-                </div>
-                <div class="form-group">
-                    {{ form.secondary_images.label }}<br>
-                    {{ form.secondary_images }}
-                </div>
-                 <div class="form-group">
-                    {{ form.tech_specs_pdf.label }}<br>
-                    {{ form.tech_specs_pdf }}
-                </div>
-                 <div class="form-group">
-                    {{ form.instruction_manual_pdf.label }}<br>
-                    {{ form.instruction_manual_pdf }}
-                </div>
-                 <div class="form-group">
-                    {{ form.terms_pdf.label }}<br>
-                    {{ form.terms_pdf }}
-                </div>
+                <button type="button" class="submit-btn" onclick="goToStep(4)">Next</button>
+            </div>
 
-                <p>{{ form.submit(class="btn btn-primary") }}</p>
+            <!-- Step 4: Costs and Finish -->
+            <div id="step4" class="step-pane" style="display:none;">
+                <div class="step-title">Costs and Registration</div>
+                <div class="cost-inputs">
+                    <div class="form-group">
+                        {{ form.cost_onsite.label }}
+                        {{ form.cost_onsite(class="form-control", placeholder="Enter cost...") }}
+                        {% for error in form.cost_onsite.errors %}<span class="error">[{{ error }}]</span>{% endfor %}
+                    </div>
+                    <div class="form-group">
+                        {{ form.cost_remote.label }}
+                        {{ form.cost_remote(class="form-control", placeholder="Enter cost...") }}
+                        {% for error in form.cost_remote.errors %}<span class="error">[{{ error }}]</span>{% endfor %}
+                    </div>
+                </div>
+                {{ form.submit(class="finish-btn") }}
             </form>
-             <a href="{{ url_for('market') }}">Back to Marketplace</a>
         </div>
     </div>
-</body>
-</html>
+
+    <script>
+        let currentStep = 1;
+        const totalSteps = 4;
+        const stepButtons = document.querySelectorAll('.steps-sidebar .step-btn');
+        const stepPanes = document.querySelectorAll('.main-step-content .step-pane');
+
+        function updateStepUI(step) {
+            stepPanes.forEach(pane => {
+                pane.style.display = 'none';
+            });
+            const activePane = document.getElementById('step' + step);
+            if (activePane) {
+                activePane.style.display = 'block'; // Use 'block' for form content
+            }
+
+            stepButtons.forEach(button => {
+                button.classList.remove('active');
+            });
+            const activeButton = document.querySelector(`.steps-sidebar .step-btn[data-step="${step}"]`);
+            if (activeButton) {
+                activeButton.classList.add('active');
+            }
+            currentStep = step;
+        }
+
+        function goToStep(step) {
+            // In a real application, you might add validation here before moving to the next step
+            if (step >= 1 && step <= totalSteps) {
+                updateStepUI(step);
+            }
+        }
+
+        stepButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const step = parseInt(button.getAttribute('data-step'));
+                goToStep(step);
+            });
+        });
+
+        // Initial UI setup
+        updateStepUI(currentStep);
+
+        // Handle custom file input triggers for upload-area
+        document.querySelectorAll('.upload-area').forEach(uploadArea => {
+            uploadArea.addEventListener('click', () => {
+                const targetId = uploadArea.getAttribute('data-target-id');
+                const fileInput = document.getElementById(targetId);
+                if (fileInput) {
+                    fileInput.click();
+                }
+            });
+        });
+
+        // Handle custom file input triggers for file-upload-btn
+        document.querySelectorAll('.file-upload-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                const targetId = button.getAttribute('data-target-id');
+                const fileInput = document.getElementById(targetId);
+                if (fileInput) {
+                    fileInput.click();
+                }
+            });
+        });
+
+        // Optional: Display selected file name
+        document.querySelectorAll('.hidden-file-input').forEach(input => {
+            input.addEventListener('change', function() {
+                const parentUploadArea = this.closest('.upload-area');
+                const parentButton = this.previousElementSibling; // For file-upload-btn
+
+                if (parentUploadArea) {
+                    const span = parentUploadArea.querySelector('span');
+                    if (this.files.length > 0) {
+                        if (this.multiple) {
+                            span.textContent = `${this.files.length} files selected`;
+                        } else {
+                            span.textContent = this.files[0].name;
+                        }
+                    } else {
+                        span.textContent = 'Click to upload'; // Reset text
+                    }
+                } else if (parentButton && parentButton.classList.contains('file-upload-btn')) {
+                    if (this.files.length > 0) {
+                        parentButton.textContent = this.files[0].name;
+                    } else {
+                        parentButton.textContent = parentButton.getAttribute('data-original-text'); // Reset to original text
+                    }
+                }
+            });
+        });
+    </script>
+{% endblock %}
