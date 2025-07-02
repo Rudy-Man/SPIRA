@@ -224,7 +224,7 @@ def my_equipment():
     # Fetch equipment listed by the currently logged-in university
     university_equipment = Equipment.query.filter_by(university_id=current_user.id).all()
     bookings = Booking.query.join(Equipment).filter(Equipment.university_id == current_user.id).order_by(Booking.created_at.desc()).all()
-    return render_template('equip_list.html', title='My Equipment', equipment_list=university_equipment, bookings=bookings)
+    return render_template('uni_home.html', title='My Equipment', equipment_list=university_equipment, bookings=bookings)
 
 @app.route('/equipment/<int:equipment_id>/request', methods=['GET', 'POST'])
 @login_required
