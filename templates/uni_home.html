@@ -314,39 +314,20 @@
                 </div>
             </div>
             <div class="section-title">Equipment list</div>
-            <div class="equipment-list-row">
-                <div class="equip-card">
-                    <div class="equip-image"><i class="fas fa-flask"></i></div>
-                    <div class="equip-title">Equipment Type</div>
-                    <div class="equip-desc">Descrniegon</div>
-                    <div class="equip-university">University</div>
-                    <div class="equip-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-                    <button class="equip-view-btn">View More</button>
-                </div>
-                <div class="equip-card">
-                    <div class="equip-image"><i class="fas fa-dna"></i></div>
-                    <div class="equip-title">Equipment Type</div>
-                    <div class="equip-desc">Descrniegon</div>
-                    <div class="equip-university">University</div>
-                    <div class="equip-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-                    <button class="equip-view-btn">View More</button>
-                </div>
-                <div class="equip-card">
-                    <div class="equip-image"><i class="fas fa-microscope"></i></div>
-                    <div class="equip-title">Equipment Type</div>
-                    <div class="equip-desc">Descrniegon</div>
-                    <div class="equip-university">University</div>
-                    <div class="equip-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-                    <button class="equip-view-btn">View More</button>
-                </div>
-                <div class="equip-card">
-                    <div class="equip-image"><i class="fas fa-atom"></i></div>
-                    <div class="equip-title">Equipment Type</div>
-                    <div class="equip-desc">Descrniegon</div>
-                    <div class="equip-university">University</div>
-                    <div class="equip-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-                    <button class="equip-view-btn">View More</button>
-                </div>
+            <div class="equipment-list-row">    
+                {% for equipment in equipment_list %}
+                    <div class="equip-card">
+                        <div class="equip-image">
+                            {% if equipment.primary_image_filename %}
+                                <img src="{{ url_for('static', filename='uploads/' + equipment.primary_image_filename) }}" alt="{{ equipment.name }}" style="width:100%; height:100%; object-fit: cover;">
+                            {% else %}
+                                <i class="fas fa-flask"></i>
+                            {% endif %}
+                        </div>
+                        <div class="equip-title">{{ equipment.name }}</div>
+                        <a href="{{ url_for('equipment_info', equipment_id=equipment.id) }}" class="equip-view-btn">View More</a>
+                    </div>
+                {% endfor %}
             </div>
             <div class="section-title">Feedback</div>
             <div class="feedback-row">
@@ -354,10 +335,8 @@
                     <span class="feedback-icon"><i class="fas fa-user-circle"></i></span>
                     <div class="feedback-line"></div>
                 </div>
-                <div class="feedback-item">
-                    <span class="feedback-icon"><i class="fas fa-user-circle"></i></span>
-                    <div class="feedback-line"></div>
-                </div>
+            
+        
                 <div class="feedback-item">
                     <span class="feedback-icon"><i class="fas fa-user-circle"></i></span>
                     <div class="feedback-line"></div>

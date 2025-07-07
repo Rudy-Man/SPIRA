@@ -190,23 +190,19 @@ oka<!DOCTYPE html>
 
             function updateFromSlider() {
                 valueDisplay.textContent = formatDisplayValue(rangeInput.value);
-                if (parseInt(rangeInput.value, 10) < parseInt(rangeInput.max, 10)) {
-                    textInput.value = rangeInput.value;
-                } else {
-                    textInput.value = '';
-                }
+                textInput.value = rangeInput.value; // Update text input directly
             }
 
             function updateFromText() {
-                let value = parseInt(textInput.value, 10);
+                let value = parseFloat(textInput.value); // Allow exact values
                 if (isNaN(value) || textInput.value.trim() === '') {
                     rangeInput.value = rangeInput.max;
                 } else {
-                    const min = parseInt(rangeInput.min, 10);
-                    const max = parseInt(rangeInput.max, 10);
+                    const min = parseFloat(rangeInput.min);
+                    const max = parseFloat(rangeInput.max);
                     rangeInput.value = Math.max(min, Math.min(value, max));
                 }
-                valueDisplay.textContent = formatDisplayValue(rangeInput.value);
+                valueDisplay.textContent = formatDisplayValue(textInput.value); // Use text input value for display
             }
 
             rangeInput.addEventListener('input', updateFromSlider);

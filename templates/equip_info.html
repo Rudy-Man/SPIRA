@@ -468,8 +468,8 @@
             </div>
             <div class="right-col">
                 <div class="uni-row">
-                    <span class="uni-icon"><i class="fas fa-user-circle"></i></span>
-                    <span class="uni-name">University name</span>
+                    <a href="{{ url_for('my_equipment') }}"><span class="uni-icon"><i class="fas fa-user-circle"></i></span></a>
+                    <span class="uni-name">{{ equipment.university.username }}</span>
                 </div>
                 <div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
                 <div class="calendar">
@@ -506,12 +506,12 @@
                 </div>
                 <a href="{{ url_for('request_equipment', equipment_id=equipment.id) }}" class="right-btn" style="display:block; text-align:center; text-decoration:none;">Request To Use</a>
                 <div class="fee-row">
-                    <span class="fee-label">Operator fee</span>
-                    <input class="fee-input" type="text">
+                    <span class="fee-label">On-site fee:</span>
+                    <span class="fee-value">{{ equipment.cost_onsite or 'N/A' }}</span>
                 </div>
                 <div class="fee-row">
-                    <span class="fee-label">Remote access fee</span>
-                    <input class="fee-input" type="text">
+                    <span class="fee-label">Remote access fee:</span>
+                    <span class="fee-value">{{ equipment.cost_remote or 'N/A' }}</span>
                 </div>
             </div>
         </div>
