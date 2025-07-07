@@ -1,6 +1,8 @@
 import os
 import json
 from flask import Flask, render_template, redirect, url_for, flash, request
+from sqlalchemy import or_, func
+import math
 from werkzeug.utils import secure_filename
 from config import Config
 from models import db, User, Equipment, Booking 
@@ -63,17 +65,17 @@ def login():
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if user is None or not user.check_password(form.password.data):
-            flash('Invalid email or password')
+            flash('Invalid email or password', 'error')
             return redirect(url_for('login'))
         login_user(user, remember=form.remember_me.data)
         
         # --- ADD THIS LOGIC ---
         # Check if the user is a university and redirect accordingly
         if user.is_university:
-            flash(f'Welcome, {user.username}!')
+            flash(f'Welcome, {user.username}!', 'success')
             return redirect(url_for('my_equipment'))
         else:
-            flash(f'Welcome back, {user.username}!')
+            flash(f'Welcome back, {user.username}!', 'success')
             return redirect(url_for('index'))
             
     return render_template('login.html', title='Sign In', form=form)
@@ -95,7 +97,7 @@ def register():
             user.is_university = True
         db.session.add(user)
         db.session.commit()
-        flash('Congratulations, you are now a registered user!')
+        flash('Congratulations, you are now a registered user!', 'success')
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
 
@@ -127,7 +129,7 @@ def google_callback():
             db.session.commit()
         
         login_user(user)
-        flash(f'Successfully logged in with Google, {user.username}!')
+        flash(f'Successfully logged in with Google, {user.username}!', 'success')
         
         # --- ADD THIS LOGIC ---
         if user.is_university:
@@ -135,7 +137,7 @@ def google_callback():
         else:
             return redirect(url_for('index'))
 
-    flash('Google Sign-In failed.')
+    flash('Google Sign-In failed.', 'error')
     return redirect(url_for('login'))
 
 @app.route('/register_equipment', methods=['GET', 'POST'])
@@ -143,7 +145,7 @@ def google_callback():
 def register_equipment():
     # Only allow universities to access this page
     if not current_user.is_university:
-        flash('Only university accounts can list equipment.')
+        flash('Only university accounts can list equipment.', 'warning')
         return redirect(url_for('index'))
 
     form = EquipmentForm()
@@ -192,7 +194,7 @@ def register_equipment():
 
         db.session.add(new_equipment)
         db.session.commit()
-        flash('Your equipment has been listed successfully!')
+        flash('Your equipment has been listed successfully!', 'success')
         return redirect(url_for('market'))
 
     return render_template('equip_regis.html', title='Register Equipment', form=form)
@@ -211,14 +213,87 @@ def equipment_info(equipment_id):
 
 @app.route('/market')
 def market():
-    all_equipment = Equipment.query.all()
-    return render_template('market.html', title='Marketplace', equipment_list=all_equipment)
+    # Get filter values from query string, providing defaults
+    search_term = request.args.get('search', '').strip()
+    category = request.args.get('category', '')
+    university_id_str = request.args.get('university_id', '')
+
+    # Find the global maximum costs to set the slider range dynamically
+    global_max_onsite = db.session.query(func.max(Equipment.cost_onsite)).scalar() or 0
+    global_max_remote = db.session.query(func.max(Equipment.cost_remote)).scalar() or 0
+
+    # Round up to the nearest 50 for a cleaner slider, with a sensible minimum.
+    slider_max_onsite = max(2000, math.ceil(global_max_onsite / 50) * 50)
+    slider_max_remote = max(2000, math.ceil(global_max_remote / 50) * 50)
+
+    # Get slider values from request, defaulting to the max value (which means "Any")
+    max_cost_onsite_str = request.args.get('max_cost_onsite', str(slider_max_onsite))
+    max_cost_remote_str = request.args.get('max_cost_remote', str(slider_max_remote))
+    university_id = int(university_id_str) if university_id_str.isdigit() else None
+
+    try:
+        max_cost_onsite = float(max_cost_onsite_str)
+        # If the slider is at its max, it means "Any", so we don't apply this filter.
+        if max_cost_onsite >= slider_max_onsite:
+            max_cost_onsite = None
+    except (ValueError, TypeError):
+        max_cost_onsite = None
+
+    try:
+        max_cost_remote = float(max_cost_remote_str)
+        if max_cost_remote >= slider_max_remote:
+            max_cost_remote = None
+    except (ValueError, TypeError):
+        max_cost_remote = None
+
+    # Start with a base query and join with User to access university name easily
+    query = Equipment.query.join(User).order_by(Equipment.name)
+
+    # Apply search term filter (on equipment name and description)
+    if search_term:
+        search_filter = f'%{search_term}%'
+        query = query.filter(
+            or_(
+                Equipment.name.ilike(search_filter),
+                Equipment.description.ilike(search_filter)
+            )
+        )
+
+    # Apply category filter
+    if category:
+        query = query.filter(Equipment.category == category)
+
+    # Apply university filter
+    if university_id:
+        query = query.filter(Equipment.university_id == university_id)
+
+    # Apply cost filters only if a max value is set
+    if max_cost_onsite is not None:
+        # Filter for equipment that has a defined on-site cost less than or equal to the max
+        query = query.filter(Equipment.cost_onsite != None, Equipment.cost_onsite <= max_cost_onsite)
+
+    if max_cost_remote is not None:
+        # Filter for equipment that has a defined remote cost less than or equal to the max
+        query = query.filter(Equipment.cost_remote != None, Equipment.cost_remote <= max_cost_remote)
+
+    filtered_equipment = query.all()
+
+    # Get all universities to populate the filter dropdown
+    all_universities = User.query.filter_by(is_university=True).order_by(User.username).all()
+
+    return render_template('market.html', title='Marketplace', equipment_list=filtered_equipment,
+                           universities=all_universities, search_term=search_term,
+                           selected_category=category, selected_university_id=university_id,
+                           slider_max_onsite=slider_max_onsite,
+                           slider_max_remote=slider_max_remote,
+                           selected_max_cost_onsite=float(max_cost_onsite_str),
+                           selected_max_cost_remote=float(max_cost_remote_str))
     
 @app.route('/my_equipment')
 @login_required
 def my_equipment():
     if not current_user.is_university:
-        flash('This page is for university accounts only.')
+        flash('This page is for university accounts only.', 'warning')
         return redirect(url_for('index'))
     
     # Fetch equipment listed by the currently logged-in university
@@ -243,7 +318,7 @@ def request_equipment(equipment_id):
         db.session.add(new_booking)
         db.session.commit()
         
-        flash('Your request has been sent to the university!')
+        flash('Your request has been sent to the university!', 'success')
         # This will eventually redirect to a page for Step 3 (Processing)
         return redirect(url_for('equipment_info', equipment_id=equipment.id))
         
@@ -256,7 +331,7 @@ def manage_booking(booking_id):
     booking = Booking.query.get_or_404(booking_id)
     # Security check: ensure the current user is the university that owns the equipment
     if not current_user.is_university or booking.equipment.university_id != current_user.id:
-        flash('You do not have permission to manage this booking.')
+        flash('You do not have permission to manage this booking.', 'error')
         return redirect(url_for('my_equipment'))
 
     form = UniversityApprovalForm()
@@ -268,7 +343,7 @@ def manage_booking(booking_id):
             booking.university_notes = form.university_notes.data
         
         db.session.commit()
-        flash('Booking has been updated successfully.')
+        flash('Booking has been updated successfully.', 'success')
         return redirect(url_for('my_equipment'))
 
     # Pre-populate form on GET request

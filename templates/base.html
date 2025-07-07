@@ -11,13 +11,57 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/forms.css') }}">
     
     {% block head_content %}{% endblock %}
+    <style>
+        /* Styles for flash messages */
+        .flashes {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 9999;
+        }
+        .flashes li {
+            position: relative;
+            padding: 15px 40px 15px 15px; /* Add padding for close button */
+            margin-bottom: 0;
+            border: 1px solid transparent;
+            border-radius: 0;
+            color: white;
+            text-align: center;
+            font-weight: 600;
+        }
+        .flashes li.error,
+        .flashes li.success,
+        .flashes li.warning,
+        .flashes li.info { background-color: #e74c3c; }
+        .flashes .close-flash {
+            position: absolute;
+            top: 50%;
+            right: 15px;
+            transform: translateY(-50%);
+            color: white;
+            font-size: 22px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .flashes .close-flash:hover {
+            color: #ddd;
+        }
+    </style>
 </head>
 <body>
-    {% with messages = get_flashed_messages() %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
-        <ul class=flashes>
-        {% for message in messages %}
-          <li style="background: #e74c3c; color: white; padding: 10px; text-align: center;">{{ message }}</li>
+        <ul class="flashes">
+        {% for category, message in messages %}
+          <li class="{{ category or 'info' }}">
+            {{ message }}
+            <span class="close-flash" onclick="this.parentElement.style.display='none';">&times;</span>
+          </li>
         {% endfor %}
         </ul>
       {% endif %}

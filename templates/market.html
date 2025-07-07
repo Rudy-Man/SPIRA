@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+oka<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -102,27 +102,42 @@
             <a href="{{ url_for('register_equipment') }}" class="btn btn-secondary" style="font-size: 1rem; padding: 8px 18px; margin-left: 18px;">List Your Equipment</a>
         {% endif %}
     </div>
+    <form method="GET" action="{{ url_for('market') }}">
     <div class="main-flex">
-        <aside class="sidebar"> 
-            <button class="filter-btn">Filters</button>
-            <div class="filter-section">
-                <label class="filter-label">Location</label>
-                <select class="filter-select"><option>All</option><option>University A</option><option>University B</option></select>
-            </div>
-            <div class="filter-section">
-                <label class="filter-label">Equipment Type</label>
-                <select class="filter-select"><option>All</option><option>Physics</option><option>Chemistry</option><option>Biology</option><option>Computer Science</option></select>
-            </div>
-            <div class="filter-section">
-                <label class="filter-label">Price</label>
-                <input class="filter-range" id="price-range" type="range" min="1000" max="20000" value="10000" step="100">
-                <span id="price-value" style="font-size:0.98em; color:#4a47a3; font-weight:600; margin-left:8px;">$10,000</span>
-                <input class="filter-select" id="price-filter-text" type="text" placeholder="e.g., 1000 or 100-500" style="width: 90%; margin-top: 10px;">
-            </div>
-            <div class="filter-section">
-                <label class="filter-label">Availability</label>
-                <select class="filter-select"><option>All</option><option>Available</option><option>Unavailable</option></select>
-            </div>
+        <aside class="sidebar">
+                <div class="filter-section">
+                    <label class="filter-label" for="university_id">Location</label>
+                    <select class="filter-select" name="university_id" id="university_id">
+                        <option value="">All Universities</option>
+                        {% for uni in universities %}
+                            <option value="{{ uni.id }}" {% if uni.id == selected_university_id %}selected{% endif %}>{{ uni.username }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-section">
+                    <label class="filter-label" for="category">Equipment Type</label>
+                    <select class="filter-select" name="category" id="category">
+                        <option value="">All Types</option>
+                        <option value="physics" {% if selected_category == 'physics' %}selected{% endif %}>Physics</option>
+                        <option value="chemistry" {% if selected_category == 'chemistry' %}selected{% endif %}>Chemistry</option>
+                        <option value="biology" {% if selected_category == 'biology' %}selected{% endif %}>Biology</option>
+                        <option value="cs" {% if selected_category == 'cs' %}selected{% endif %}>Computer Science</option>
+                        <option value="other" {% if selected_category == 'other' %}selected{% endif %}>Other</option>
+                    </select>
+                </div>
+                <div class="filter-section">
+                    <label class="filter-label" for="max_cost_onsite">Max On-site Cost (/hr)</label>
+                    <input class="filter-range" id="cost-onsite-range" name="max_cost_onsite" type="range" min="0" max="{{ slider_max_onsite }}" value="{{ selected_max_cost_onsite }}" step="50">
+                    <span id="cost-onsite-value" style="font-size:0.98em; color:#4a47a3; font-weight:600; margin-left:8px;"></span>
+                    <input class="filter-select" id="cost-onsite-text" type="number" placeholder="e.g., 500" style="width: 90%; margin-top: 10px;">
+                </div>
+                <div class="filter-section">
+                    <label class="filter-label" for="max_cost_remote">Max Remote Cost (/hr)</label>
+                    <input class="filter-range" id="cost-remote-range" name="max_cost_remote" type="range" min="0" max="{{ slider_max_remote }}" value="{{ selected_max_cost_remote }}" step="50">
+                    <span id="cost-remote-value" style="font-size:0.98em; color:#4a47a3; font-weight:600; margin-left:8px;"></span>
+                    <input class="filter-select" id="cost-remote-text" type="number" placeholder="e.g., 500" style="width: 90%; margin-top: 10px;">
+                </div>
+                <button type="submit" class="filter-btn">Apply Filters</button>
         </aside>
         <main class="main-content">
             <a href="{{ url_for('index') }}" class="btn btn-secondary" style="margin-bottom: 18px; display: inline-block;">&larr; Back to Home</a>
@@ -131,8 +146,8 @@
                 <span class="sort-by">sort by <select><option>Relevance</option><option>Price</option><option>Rating</option></select></span>
             </div>
             <div class="search-bar-main">
-                <input type="text" placeholder="Search...">
-                <button><i class="fas fa-search"></i></button>
+                <input type="text" name="search" placeholder="Search by name or keyword..." value="{{ search_term or '' }}">
+                <button type="submit"><i class="fas fa-search"></i></button>
             </div>
             <div class="equipment-grid">
                 {% for equipment in equipment_list %}
@@ -150,22 +165,59 @@
                         <a href="{{ url_for('equipment_info', equipment_id=equipment.id) }}" class="equip-view-btn">View More</a>
                     </div>
                 {% else %}
-                    <p>No equipment has been listed yet. Be the first!</p>
+                    <p style="color: #ccc;">No equipment found matching your criteria.</p>
                 {% endfor %}
             </div>
         </main>
     </div>
+    </form>
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var priceRange = document.getElementById('price-range');
-        var priceValue = document.getElementById('price-value');
-        function formatUSD(val) {
-            return '$' + Number(val).toLocaleString();
+    document.addEventListener('DOMContentLoaded', function () {
+        function setupSlider(rangeId, valueId, textId) {
+            const rangeInput = document.getElementById(rangeId);
+            const valueDisplay = document.getElementById(valueId);
+            const textInput = document.getElementById(textId);
+
+            if (!rangeInput || !valueDisplay || !textInput) return;
+
+            function formatDisplayValue(val) {
+                // Show 'Any' if the value is the max value of the slider
+                if (parseInt(val, 10) >= parseInt(rangeInput.max, 10)) {
+                    return 'Any';
+                }
+                return '$' + Number(val).toLocaleString();
+            }
+
+            function updateFromSlider() {
+                valueDisplay.textContent = formatDisplayValue(rangeInput.value);
+                if (parseInt(rangeInput.value, 10) < parseInt(rangeInput.max, 10)) {
+                    textInput.value = rangeInput.value;
+                } else {
+                    textInput.value = '';
+                }
+            }
+
+            function updateFromText() {
+                let value = parseInt(textInput.value, 10);
+                if (isNaN(value) || textInput.value.trim() === '') {
+                    rangeInput.value = rangeInput.max;
+                } else {
+                    const min = parseInt(rangeInput.min, 10);
+                    const max = parseInt(rangeInput.max, 10);
+                    rangeInput.value = Math.max(min, Math.min(value, max));
+                }
+                valueDisplay.textContent = formatDisplayValue(rangeInput.value);
+            }
+
+            rangeInput.addEventListener('input', updateFromSlider);
+            textInput.addEventListener('input', updateFromText);
+
+            // Initial display update on page load
+            updateFromSlider();
         }
-        priceRange.addEventListener('input', function() {
-            priceValue.textContent = formatUSD(this.value);
-        });
-        priceValue.textContent = formatUSD(priceRange.value);
+
+        setupSlider('cost-onsite-range', 'cost-onsite-value', 'cost-onsite-text');
+        setupSlider('cost-remote-range', 'cost-remote-value', 'cost-remote-text');
     });
     </script>
 </body>
