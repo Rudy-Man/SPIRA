@@ -8,6 +8,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick-theme.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
@@ -106,14 +108,19 @@
  
         <section class="marketplace">
             <div class="container">
-                <h2>A Marketplace for Science</h2> <div class="item-grid">
+                <h2>A Marketplace for Science</h2>
+                <div class="equipment-carousel">
                     {% for equipment in equipment_list %}
-                        <div class="item-card">
-                            <div class="item-image placeholder small">
-                                <img src="{{ url_for('static', filename='uploads/' + equipment.primary_image_filename) }}" alt="{{ equipment.name }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                        <div class="item-card-wrapper">
+                            <div class="item-card">
+                                <div class="item-image placeholder small">
+                                    {% if equipment.primary_image_filename %}
+                                        <img src="{{ url_for('static', filename='uploads/' + equipment.primary_image_filename) }}" alt="{{ equipment.name }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                                    {% endif %}
+                                </div>
+                                <p>{{ equipment.name }} at {{ equipment.university.username }}</p>
+                                <p class="price">${{ equipment.cost_onsite or 'N/A' }} /h</p>
                             </div>
-                            <p>{{ equipment.name }} at {{ equipment.university.username }}</p>
-                            <p class="price">${{ equipment.cost_onsite or 'N/A' }} /h</p>
                         </div>
                     {% endfor %}
                 </div>
@@ -135,10 +142,86 @@
  
     <div id="overlay" class="overlay"></div>
     <aside id="user-profile-sidebar" class="sidebar">
-        </aside>
+    </aside>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
+
     <script>
-        // Your existing JavaScript
+        document.addEventListener('DOMContentLoaded', function() {
+            const overlay = document.getElementById('overlay');
+            const profileSidebar = document.getElementById('user-profile-sidebar');
+            const profileButton = document.getElementById('user-profile-button');
+            const mobileMenu = document.querySelector('.mobile-nav');
+            const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+
+            // Animate on Scroll (AOS) initialization with adjustments
+            document.querySelectorAll('.animate-on-scroll').forEach(element => {
+                element.style.opacity = 0; // Ensure elements are initially hidden
+            });
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target); // Animate only once
+                    }
+                });
+            }, { threshold: 0.1 }); // Adjust threshold as needed
+
+            document.querySelectorAll('.animate-on-scroll').forEach(element => {
+                observer.observe(element);
+            });
+
+            // User profile sidebar toggle
+            if (profileButton && profileSidebar && overlay) {
+                profileButton.addEventListener('click', () => {
+                    profileSidebar.classList.add('active');
+                    overlay.classList.add('active');
+                });
+
+                overlay.addEventListener('click', () => {
+                    profileSidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                });
+            }
+
+            // Mobile menu toggle
+            if (mobileMenu && mobileMenuToggle) {
+                mobileMenuToggle.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('active');
+                });
+            }
+
+            // Equipment Carousel
+            $('.equipment-carousel').slick({  
+                centerMode: true,  // Keep item centered
+                centerPadding: '60px', // Adjust padding around center item
+                slidesToShow: 1, // Set to 1 to highlight only the center item
+                autoplay: true, // Keep auto-play functionality
+                autoplaySpeed: 3000, // Adjust auto-play speed as needed
+                dots: true, // Keep dots navigation
+                arrows: true, // Keep arrows navigation
+                infinite: true, // Keep infinite loop
+                prevArrow: '<button type="button" class="slick-prev"><i class="fas fa-chevron-left"></i></button>',
+                nextArrow: '<button type="button" class="slick-next"><i class="fas fa-chevron-right"></i></button>',
+                responsive: [
+                    {
+                        breakpoint: 1024,
+                        settings: { slidesToShow: 1, centerPadding: '15%', } 
+                    },
+                    {
+                        breakpoint: 600,
+                        settings: {
+                            slidesToShow: 1,
+                            centerPadding: '20px',  // Reduced padding on smaller screens
+                            arrows: false,  // Hide arrows on small screens
+                            dots: false, // Hide dots on smaller screens
+                        }
+                    } 
+                ]
+            });
+        });
     </script>
- 
 </body>
 </html>

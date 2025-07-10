@@ -724,3 +724,70 @@ footer {
     padding-left: 10px; /* Added for responsiveness */
     padding-right: 10px; /* Added for responsiveness */
 }
+
+.item-card {
+    width: 650px;  /* Further increased width */
+    height: 700px;  /* Further increased height */
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- NEW CAROUSEL STYLES --- */
+
+.equipment-carousel {
+    padding: 20px 0;
+}
+
+.equipment-carousel .slick-slide {
+    transition: all 0.3s ease-in-out;
+    opacity: 0.5;
+    transform: scale(0.8);
+}
+
+.equipment-carousel .slick-center {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.equipment-carousel .item-card-wrapper {
+    padding: 0 15px;
+}
+
+.equipment-carousel .slick-prev,
+.equipment-carousel .slick-next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    background-color: rgba(35, 39, 47, 0.7);
+    border: 1px solid var(--accent-color);
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.equipment-carousel:hover .slick-prev,
+.equipment-carousel:hover .slick-next {
+    opacity: 1;
+}
+
+.equipment-carousel .slick-prev {
+    left: -20px;
+}
+
+.equipment-carousel .slick-next {
+    right: -20px;
+}
+
+.equipment-carousel .slick-dots li button:before {
+    font-size: 12px;
+    color: var(--primary-color);
+}
+
+.equipment-carousel .slick-dots li.slick-active button:before {
+    color: var(--accent-color);
+}

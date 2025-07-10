@@ -8,21 +8,17 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    
 </head>
 <body>
  
     <header>
         <div class="container">
-            <a href="{{ url_for('index') }}" class="logo">
-                <i class="fas fa-flask-vial logo-icon"></i> SPIRA
-            </a>
+            <a href="{{ url_for('index') }}" class="logo"> <i class="fas fa-flask-vial logo-icon"></i> SPIRA </a>
             <nav>
                 <ul>
                     <li><a href="{{ url_for('market') }}">Marketplace</a></li>
-                    <li><a href="#">Threads</a></li>
+                    <li><a href="{{ url_for('threads') }}">Threads</a></li>
                 </ul>
             </nav>
             <div class="header-right">
@@ -32,6 +28,13 @@
                 </form>
 
                 {% if current_user.is_authenticated %}
+                    
+                    {% if current_user.is_university %}
+                        <a href="{{ url_for('register_equipment') }}" class="btn btn-secondary">List Equipment</a>
+                        {# Add a link for university users to go back to their equipment list #}
+                        <a href="{{ url_for('my_equipment') }}" class="btn btn-secondary" style="margin-left: 10px;">My Equipment Dashboard</a>
+                    {% endif %}
+
                     <a href="{{ url_for('logout') }}" class="btn btn-primary">Log Out</a>
                     <button id="user-profile-button" class="user-profile-btn" aria-label="User Profile">
                         <i class="fas fa-user-circle"></i>
@@ -46,9 +49,8 @@
  
      <nav class="mobile-nav">
          <ul>
-            <li><a href="Marketplace.html">Marketplace</a></li>
-            
-            <li><a href="Threads.html">Threads</a></li>
+            <li><a href="{{ url_for('market') }}">Marketplace</a></li>
+            <li><a href="{{ url_for('threads') }}">Threads</a></li>
             <li>
                 <form class="mobile-search-form">
                     <input type="search" placeholder="Search...">
@@ -64,8 +66,8 @@
                 <div class="hero-text"> <h1>Science, Connected.</h1>
                     <p>Empowering global collaboration, one discovery at a time.</p>
                     <div class="cta-buttons">
-                        <a href="Marketplace.html" class="btn btn-primary">Explore Marketplace</a>
-                        <a href="Threads.html" class="btn btn-secondary">Join a Thread</a>
+                        <a href="{{ url_for('market') }}" class="btn btn-primary">Explore Marketplace</a>
+                        <a href="{{ url_for('threads') }}" class="btn btn-secondary">Join a Thread</a>
                     </div>
                 </div>
                 <div class="hero-image placeholder"> <span>HERO IMAGE</span>
@@ -105,22 +107,15 @@
         <section class="marketplace">
             <div class="container">
                 <h2>A Marketplace for Science</h2> <div class="item-grid">
-                    <div class="item-card"> <div class="item-image placeholder small"></div>
-                        <p>X equipment at X university</p>
-                        <p class="price">$X /h</p>
-                    </div>
-                    <div class="item-card"> <div class="item-image placeholder small"></div>
-                        <p>X equipment at X university</p>
-                        <p class="price">$X /h</p>
-                    </div>
-                    <div class="item-card"> <div class="item-image placeholder small"></div>
-                        <p>X equipment at X university</p>
-                        <p class="price">$X /h</p>
-                    </div>
-                    <div class="item-card"> <div class="item-image placeholder small"></div>
-                        <p>X equipment at X university</p>
-                        <p class="price">$X /h</p>
-                    </div>
+                    {% for equipment in equipment_list %}
+                        <div class="item-card">
+                            <div class="item-image placeholder small">
+                                <img src="{{ url_for('static', filename='uploads/' + equipment.primary_image_filename) }}" alt="{{ equipment.name }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                            </div>
+                            <p>{{ equipment.name }} at {{ equipment.university.username }}</p>
+                            <p class="price">${{ equipment.cost_onsite or 'N/A' }} /h</p>
+                        </div>
+                    {% endfor %}
                 </div>
             </div>
         </section>
@@ -128,7 +123,7 @@
         <section class="footer-cta" style="background-color: #23272f; color: #f4f4f4;">
             <div class="container">
                 <p>"Science has no borders. Neither should opportunity."</p>
-                <a href="#about-us" class="btn btn-secondary">About us</a>
+                <a href="{{ url_for('about') }}" class="btn btn-secondary">About us</a>
             </div>
         </section>
     </main>
@@ -140,239 +135,72 @@
  
     <div id="overlay" class="overlay"></div>
     <aside id="user-profile-sidebar" class="sidebar">
-        <button id="close-sidebar-button" class="close-btn" aria-label="Close Profile"><i class="fas fa-times"></i></button>
- 
-        <div class="profile-header">
-            <div class="profile-pic placeholder round"></div>
-            <h3>Username</h3>
-            <p class="bio">About me: Short bio placeholder text here...</p>
-        </div>
- 
-        <div class="profile-stats" style="justify-content: space-around;">
-            <div><span>X</span><span class="label">Rented</span></div>
-            <div><span>X</span><span class="label">Listed</span></div>
-        </div>
- 
-        <div class="profile-actions" style="margin-top: 30px;">
-            <button><i class="fas fa-sign-out-alt"></i> Log out</button>
-        </div>
-    </aside>
-    <div id="settings-sidebar" class="sidebar" style="right:-380px; z-index:2100;">
-        <button id="close-settings-btn" class="close-btn" aria-label="Close Settings"><i class="fas fa-times"></i></button>
-        <div class="settings-header">
-            <h3>Settings</h3>
-        </div>
-        <div class="settings-section">
-            <label><input type="checkbox" id="show-footer-cta" checked> Show Footer Quote</label>
-        </div>
-    </div>
- 
-    <div id="sign-in-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.7); z-index:3000; align-items:center; justify-content:center;">
-        <div style="background:#23272f; color:#f4f4f4; border-radius:10px; padding:40px 32px; min-width:320px; max-width:90vw; box-shadow:0 4px 24px #000; display:flex; flex-direction:column; align-items:center;">
-            <h2 style="color:#34ace0; margin-bottom:18px;">Sign In</h2>
-            <button id="gmail-signin" style="margin-bottom:16px; padding:10px 24px; background:#fff; color:#23272f; border:none; border-radius:4px; font-weight:600; cursor:pointer; width:100%;">Sign in with Gmail</button>
-            <div style="margin:12px 0; color:#aaa;">or</div>
-            <input id="phone-input" type="tel" placeholder="Phone number" style="padding:8px; border-radius:4px; border:1px solid #444; background:#2c2f36; color:#f4f4f4; width:100%; margin-bottom:12px;">
-            <button id="phone-signin" style="padding:10px 24px; background:#34ace0; color:#fff; border:none; border-radius:4px; font-weight:600; cursor:pointer; width:100%;">Sign in with Phone</button>
-            <button id="close-signin" style="margin-top:18px; background:none; color:#aaa; border:none; cursor:pointer;">Cancel</button>
-        </div>
-    </div>
- 
-    <section id="about-us" style="background: #23272f; color: #f4f4f4; padding: 60px 0;">
-        <div class="container" style="max-width: 800px;">
-            <h2 style="color: #34ace0;">About Us</h2>
-            <p style="font-size: 1.15em; margin-bottom: 24px;">SPIRA is dedicated to connecting scientists, researchers, and institutions worldwide, breaking down barriers to collaboration and discovery. Our platform empowers users to share resources, ideas, and opportunities in a seamless, global environment.</p>
-            <div style="margin-top: 32px;">
-                <h3 style="color: #b0b0ff;">Founder</h3>
-                <div style="display: flex; align-items: center; gap: 18px;">
-                    <div style="width: 70px; height: 70px; border-radius: 50%; background: #2c2f36; display: flex; align-items: center; justify-content: center; font-size: 2.2em; color: #34ace0; font-weight: bold;">NP</div>
-                    <div>
-                        <div style="font-size: 1.1em; font-weight: 600; color: #f4f4f4;">Nakul Paveri</div>
-                        <div style="color: #aaa;">Founder</div>
-                    </div>
-                </div>
-                <div style="margin-top: 32px; text-align:center;">
-                    <a href="about.html" class="btn btn-primary" style="margin-top:24px;">Meet the Team</a>
-                </div>
-            </div>
-        </div>
-    </section>
- 
+        </aside>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const userProfileButton = document.getElementById('user-profile-button');
-            const sidebar = document.getElementById('user-profile-sidebar');
-            const closeSidebarButton = document.getElementById('close-sidebar-button');
+        document.addEventListener('DOMContentLoaded', function() {
             const overlay = document.getElementById('overlay');
+            const profileSidebar = document.getElementById('user-profile-sidebar');
+            const profileButton = document.getElementById('user-profile-button');
+            const mobileMenu = document.querySelector('.mobile-nav');
             const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
-            const mobileNav = document.querySelector('.mobile-nav');
-            let isSignedIn = false;
-            const signInModal = document.getElementById('sign-in-modal');
-            const closeSignInBtn = document.getElementById('close-signin');
-            const gmailSigninBtn = document.getElementById('gmail-signin');
-            const phoneSigninBtn = document.getElementById('phone-signin');
-            const phoneInput = document.getElementById('phone-input');
-            const signInBtn = document.getElementById('sign-in-btn');
- 
-            // --- Sidebar Functionality ---
-            function openSidebar() {
-                if (isSignedIn) {
-                    sidebar.classList.add('active');
+
+            // Animate on Scroll (AOS) initialization with adjustments
+            document.querySelectorAll('.animate-on-scroll').forEach(element => {
+                element.style.opacity = 0; // Ensure elements are initially hidden
+            });
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target); // Animate only once
+                    }
+                });
+            }, { threshold: 0.1 }); // Adjust threshold as needed
+
+            document.querySelectorAll('.animate-on-scroll').forEach(element => {
+                observer.observe(element);
+            });
+
+            // User profile sidebar toggle
+            if (profileButton && profileSidebar && overlay) {
+                profileButton.addEventListener('click', () => {
+                    profileSidebar.classList.add('active');
                     overlay.classList.add('active');
-                    document.body.style.overflowY = 'hidden';
-                }
-            }
- 
-            function closeSidebar() {
-                sidebar.classList.remove('active');
-                overlay.classList.remove('active');
-                document.body.style.overflowY = '';
-            }
- 
-            if (userProfileButton && sidebar && closeSidebarButton && overlay) {
-                userProfileButton.addEventListener('click', function() {
-                    if (!isSignedIn) {
-                        openSignInModal();
-                    } else {
-                        openSidebar();
-                    }
                 });
-                closeSidebarButton.addEventListener('click', closeSidebar);
-                overlay.addEventListener('click', closeSidebar);
- 
-                document.addEventListener('keydown', (event) => {
-                    if (event.key === 'Escape' && sidebar.classList.contains('active')) {
-                        closeSidebar();
-                    }
+
+                overlay.addEventListener('click', () => {
+                    profileSidebar.classList.remove('active');
+                    overlay.classList.remove('active');
                 });
-            } else {
-                console.error("Sidebar elements not found!");
             }
- 
-            // --- Mobile Menu Functionality ---
-             if (mobileMenuToggle && mobileNav) {
+
+            // Mobile menu toggle
+            if (mobileMenu && mobileMenuToggle) {
                 mobileMenuToggle.addEventListener('click', () => {
-                    mobileNav.classList.toggle('active');
-                    const icon = mobileMenuToggle.querySelector('i');
-                    if (mobileNav.classList.contains('active')) {
-                        icon.classList.remove('fa-bars');
-                        icon.classList.add('fa-times');
-                        mobileMenuToggle.setAttribute('aria-label', 'Close Menu');
-                    } else {
-                        icon.classList.remove('fa-times');
-                        icon.classList.add('fa-bars');
-                         mobileMenuToggle.setAttribute('aria-label', 'Toggle Menu');
-                    }
-                });
- 
-                // Close mobile menu if user clicks a link inside it (optional)
-                mobileNav.querySelectorAll('a').forEach(link => {
-                    link.addEventListener('click', () => {
-                        if (mobileNav.classList.contains('active')) {
-                            mobileNav.classList.remove('active');
-                            mobileMenuToggle.querySelector('i').classList.remove('fa-times');
-                            mobileMenuToggle.querySelector('i').classList.add('fa-bars');
-                            mobileMenuToggle.setAttribute('aria-label', 'Toggle Menu');
-                        }
-                    });
-                });
- 
-            } else {
-                 console.error("Mobile menu elements not found!");
-            }
- 
-            // --- Cool Scroll Animations (Example using Intersection Observer) ---
-            const animatedElements = document.querySelectorAll('.feature-box, .item-card, .hero-text, .hero-image, .lab-text h2, .marketplace h2');
- 
-            // Check if IntersectionObserver is supported
-            if ('IntersectionObserver' in window) {
-                const observer = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            // Add a class to trigger animation (defined in CSS)
-                            entry.target.classList.add('visible');
-                            // Optional: Stop observing once visible to prevent re-animation
-                             observer.unobserve(entry.target);
-                        }
-                    });
-                }, {
-                    threshold: 0.1 // Trigger when 10% of the element is visible
-                });
- 
-                animatedElements.forEach(el => {
-                    // Add the base class needed for the animation styles
-                    el.classList.add('animate-on-scroll');
-                    observer.observe(el);
-                });
-            } else {
-                // Fallback for older browsers: just make elements visible immediately
-                console.log("IntersectionObserver not supported, animations disabled.");
-                animatedElements.forEach(el => {
-                     el.classList.add('visible'); 
+                    mobileMenu.classList.toggle('active');
                 });
             }
- 
-            // Settings sidebar logic
-            const settingsBtn = document.getElementById('settings-btn');
-            const settingsSidebar = document.getElementById('settings-sidebar');
-            const closeSettingsBtn = document.getElementById('close-settings-btn');
-            settingsBtn.addEventListener('click', function() {
-                settingsSidebar.style.transform = 'translateX(-380px)';
-                settingsSidebar.classList.add('active');
-                document.getElementById('overlay').classList.add('active');
-                document.body.style.overflowY = 'hidden';
-            });
-            closeSettingsBtn.addEventListener('click', function() {
-                settingsSidebar.style.transform = '';
-                settingsSidebar.classList.remove('active');
-                document.getElementById('overlay').classList.remove('active');
-                document.body.style.overflowY = '';
-            });
-            document.getElementById('overlay').addEventListener('click', function() {
-                settingsSidebar.style.transform = '';
-                settingsSidebar.classList.remove('active');
-                document.getElementById('overlay').classList.remove('active');
-                document.body.style.overflowY = '';
-            });
- 
-            // Footer CTA control
-            document.getElementById('show-footer-cta').addEventListener('change', function() {
-                document.querySelector('.footer-cta').style.display = this.checked ? '' : 'none';
-            });
- 
-            function updateAuthUI() {
-                if (isSignedIn) {
-                    signInBtn.style.display = 'none';
-                    userProfileButton.style.display = '';
-                } else {
-                    signInBtn.style.display = '';
-                    userProfileButton.style.display = 'none';
-                }
-            }
-            updateAuthUI();
-            signInBtn.addEventListener('click', function() {
-                window.location.href = 'SignIn.html';
-            });
-            // After successful sign-in:
-            gmailSigninBtn.addEventListener('click', function() {
-                isSignedIn = true;
-                closeSignInModal();
-                updateAuthUI();
-                openSidebar();
-            });
-            phoneSigninBtn.addEventListener('click', function() {
-                if (phoneInput.value.trim().length >= 8) {
-                    isSignedIn = true;
-                    closeSignInModal();
-                    updateAuthUI();
-                    openSidebar();
-                } else {
-                    phoneInput.style.borderColor = '#e74c3c';
-                    phoneInput.placeholder = 'Enter a valid phone number';
-                }
+
+            // Equipment Carousel
+            $('.equipment-carousel').slick({
+                slidesToShow: 1,
+                slidesToScroll: 1,
+                autoplay: true, // Enable autoplay
+                autoplaySpeed: 3000, // Time between slides in milliseconds
+                dots: true,  // Show navigation dots
+                arrows: true, // Enable navigation arrows
+                prevArrow: '<button type="button" class="slick-prev">Previous</button>',
+                nextArrow: '<button type="button" class="slick-next">Next</button>',
+                infinite: true, // Loop the carousel
+                responsive: [
+                    { breakpoint: 1024, settings: { slidesToShow: 2, slidesToScroll: 1, } },
+                    { breakpoint: 600, settings: { slidesToShow: 1, slidesToScroll: 1 } }
+                ]
             });
         });
     </script>
- 
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
 </body>
 </html>

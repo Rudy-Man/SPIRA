@@ -213,6 +213,22 @@ def equipment_info(equipment_id):
         
     return render_template('equip_info.html', title=equipment.name, equipment=equipment, secondary_images=secondary_images)
 
+@app.route('/equipment/<int:equipment_id>/delete', methods=['POST'])
+@login_required
+def delete_equipment(equipment_id):
+    equipment = Equipment.query.get_or_404(equipment_id)
+    if not current_user.is_university or equipment.university_id != current_user.id:
+        flash('You do not have permission to delete this equipment.', 'error')
+        return redirect(url_for('equipment_info', equipment_id=equipment_id))
+
+    db.session.delete(equipment)
+    db.session.commit()
+    flash('Equipment listing has been removed.', 'success')
+    return redirect(url_for('my_equipment'))
+        
+    return render_template('equip_info.html', title=equipment.name, equipment=equipment, secondary_images=secondary_images)
+
+
 @app.route('/market')
 def market():
     # Get filter values from query string, providing defaults
