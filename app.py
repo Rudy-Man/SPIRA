@@ -40,7 +40,9 @@ oauth.register(
 # --- Routes ---
 @app.route('/')
 def index():
-    return render_template('index.html')
+    # Fetch some equipment for display on the homepage.  Adjust the number as needed.
+    equipment_list = Equipment.query.limit(4).all()  
+    return render_template('index.html', equipment_list=equipment_list)
 
 @app.route('/threads')
 def threads():

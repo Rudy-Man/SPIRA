@@ -107,22 +107,15 @@
         <section class="marketplace">
             <div class="container">
                 <h2>A Marketplace for Science</h2> <div class="item-grid">
-                    <div class="item-card"> <div class="item-image placeholder small"></div>
-                        <p>X equipment at X university</p>
-                        <p class="price">$X /h</p>
-                    </div>
-                    <div class="item-card"> <div class="item-image placeholder small"></div>
-                        <p>X equipment at X university</p>
-                        <p class="price">$X /h</p>
-                    </div>
-                    <div class="item-card"> <div class="item-image placeholder small"></div>
-                        <p>X equipment at X university</p>
-                        <p class="price">$X /h</p>
-                    </div>
-                    <div class="item-card"> <div class="item-image placeholder small"></div>
-                        <p>X equipment at X university</p>
-                        <p class="price">$X /h</p>
-                    </div>
+                    {% for equipment in equipment_list %}
+                        <div class="item-card">
+                            <div class="item-image placeholder small">
+                                <img src="{{ url_for('static', filename='uploads/' + equipment.primary_image_filename) }}" alt="{{ equipment.name }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                            </div>
+                            <p>{{ equipment.name }} at {{ equipment.university.username }}</p>
+                            <p class="price">${{ equipment.cost_onsite or 'N/A' }} /h</p>
+                        </div>
+                    {% endfor %}
                 </div>
             </div>
         </section>

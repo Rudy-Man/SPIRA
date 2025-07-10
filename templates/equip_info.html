@@ -513,6 +513,25 @@
                     <span class="fee-label">Remote access fee:</span>
                     <span class="fee-value">{{ equipment.cost_remote or 'N/A' }}</span>
                 </div>
+                {% if current_user.is_authenticated and current_user.id == equipment.university_id %}
+                    <form method="post" action="{{ url_for('delete_equipment', equipment_id=equipment.id) }}" onsubmit="return confirm('Are you sure you want to remove this equipment listing?');">
+                        <button type="submit" class="right-btn remove-listing-btn">Remove Listing</button>
+                    </form>
+                {% endif %}
+
+<style>
+    .remove-listing-btn {
+        background-color: #b30000; /* Darker red */
+        color: white;
+        padding: 12px 20px; /* Increased padding */
+    }
+    .remove-listing-btn:hover {
+        background-color: #800000; /* Even darker red on hover */
+    }
+    .remove-listing-btn:active {
+        background-color: #500000; /* Slightly different shade for active state */
+    }
+</style>
             </div>
         </div>
 
