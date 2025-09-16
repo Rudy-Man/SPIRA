@@ -49,8 +49,28 @@ class Equipment(db.Model):
     # Foreign Key to link to the User (University)
     university_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     university = db.relationship('User', back_populates='equipment')
+
+    def average_rating(self):
+        return calculate_average_rating(self.id)
     
 
+class Rating(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    equipment_id = db.Column(db.Integer, db.ForeignKey('equipment.id'), nullable=False)
+    rating = db.Column(db.Integer, nullable=False)  # Integer from 1 to 5
+    
+    user = db.relationship('User', backref=db.backref('ratings', lazy='dynamic'))
+    equipment = db.relationship('Equipment', backref=db.backref('ratings', lazy='dynamic'))
+
+def calculate_average_rating(equipment_id):
+    """Calculate the average rating for a given equipment ID."""
+    ratings = Rating.query.filter_by(equipment_id=equipment_id).all()
+    if ratings:
+        total_rating = sum(rating.rating for rating in ratings)
+        return round(total_rating / len(ratings), 1)  # Round to one decimal place
+    return 0  # Return 0 if there are no ratings
+    
 class Booking(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     

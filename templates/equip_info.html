@@ -75,8 +75,8 @@
             max-width: 50%;
         }
         .main-image {
-            width: 100%;
-            height: 200px;
+            width: 550px; /* Increased width */
+            height: 400px;
             background: #e6e8fa;
             border: 2px solid var(--primary-color);
             border-radius: 6px;
@@ -92,15 +92,17 @@
             gap: 10px;
             margin-bottom: 18px;
         }
+
         .thumb {
-            width: 50px;
-            height: 50px;
+            width: 65px;  /* Increased thumbnail size */
+            height: 65px; /* Increased thumbnail size */
             background: #e6e8fa;
             border: 2px solid var(--primary-color);
             border-radius: 4px;
             display: flex;
             align-items: center;
             justify-content: center;
+            cursor: pointer;  /* Add cursor pointer */
             color: var(--secondary-color);
             font-size: 1.3rem;
         }
@@ -116,6 +118,7 @@
             font-size: 1rem;
             cursor: pointer;
             transition: background 0.2s, color 0.2s;
+            text-align: center; /* Center the text */
         }
         .left-btn:hover {
             background: var(--primary-color);
@@ -185,6 +188,7 @@
             font-size: 1.1rem;
             cursor: pointer;
             transition: background 0.2s, color 0.2s;
+            text-align: center; /* Center the text */
         }
         .right-btn:hover {
             background: var(--primary-color);
@@ -360,7 +364,7 @@
             document.querySelectorAll('.feedback-section .tab-content').forEach((content, idx) => {
                 content.style.display = idx === tabIndex ? 'block' : 'none';
             });
-        }
+        }  
         window.onload = function() {
             setActiveTab('tab-section1', 0);
             setActiveTab('tab-section2', 1);
@@ -428,6 +432,23 @@
 
         });
     </script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const mainImage = document.querySelector('.main-image img');
+        const thumbnails = document.querySelectorAll('.thumb img');
+
+        thumbnails.forEach(thumb => {
+            thumb.addEventListener('click', function() {
+                // Swap src attributes between main image and clicked thumbnail
+                const mainSrc = mainImage.src;
+                mainImage.src = this.src;
+                this.src = mainSrc;
+
+                // Optional: Update alt text or other attributes if needed
+            });
+        });
+    });
+    </script>
 </head>
 <body>
     <div class="nav-bar">
@@ -443,7 +464,9 @@
                 <img src="{{ url_for('static', filename='uploads/' + equipment.primary_image_filename) }}" alt="{{ equipment.name }}" style="width:100%; height:100%; object-fit: cover; border-radius: 6px;">
                 {% else %}
                 Main Image
-                {% endif %}
+            {% endif %}
+
+
             </div>
 
             <div class="thumb-row">
@@ -454,24 +477,37 @@
                 {% endfor %}
             </div>
 
+            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
             {% if equipment.tech_specs_pdf_filename %}
-                <a href="{{ url_for('static', filename='uploads/' + equipment.tech_specs_pdf_filename) }}" class="left-btn" target="_blank">Technical Specs</a>
+                <a href="{{ url_for('static', filename='uploads/' + equipment.tech_specs_pdf_filename) }}" class="left-btn" target="_blank" style="padding: 10px 15px; margin-bottom: 0;">Technical Specs</a>
             {% endif %}
             
+
             {% if equipment.instruction_manual_pdf_filename %}
-                <a href="{{ url_for('static', filename='uploads/' + equipment.instruction_manual_pdf_filename) }}" class="left-btn" target="_blank">Instruction Manual (PDF)</a>
+                <a href="{{ url_for('static', filename='uploads/' + equipment.instruction_manual_pdf_filename) }}" class="left-btn" target="_blank" style="padding: 10px 15px;">Instruction Manual (PDF)</a>
             {% endif %}
             
             {% if equipment.terms_pdf_filename %}
-                <a href="{{ url_for('static', filename='uploads/' + equipment.terms_pdf_filename) }}" class="left-btn" target="_blank">Terms and Conditions</a>
+                <a href="{{ url_for('static', filename='uploads/' + equipment.terms_pdf_filename) }}" class="left-btn" target="_blank" style="padding: 10px 15px;">Terms and Conditions</a>
             {% endif %}
+            </div>
             </div>
             <div class="right-col">
                 <div class="uni-row">
                     <a href="{{ url_for('my_equipment') }}"><span class="uni-icon"><i class="fas fa-user-circle"></i></span></a>
                     <span class="uni-name">{{ equipment.university.username }}</span>
                 </div>
-                <div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                {% if equipment.ratings %}
+                <div class="stars">
+                    {% set average_rating = equipment.average_rating() %}
+                    {% for i in range(5) %}
+                        {% if i < average_rating %}
+                            &#9733;  <!-- Filled star -->
+                        {% else %}
+                            &#9734;  <!-- Empty star -->
+                        {% endif %}
+                    {% endfor %}
+                </div>
                 <div class="calendar">
                     <div id="selected-date" style="font-weight:bold; color:#4a47a3; margin-bottom: 8px;"></div>
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 8px;">
@@ -518,22 +554,17 @@
                         <button type="submit" class="right-btn remove-listing-btn">Remove Listing</button>
                     </form>
                 {% endif %}
-
+            </div>
+        </div>
 <style>
     .remove-listing-btn {
         background-color: #cf0000; /* Darker red */
         color: white;
         padding: 12px 20px; /* Increased padding */
     }
-    .remove-listing-btn:hover {
-        background-color: #970202; /* Even darker red on hover */
-    }
-    .remove-listing-btn:active {
-        background-color: #6e0000; /* Slightly different shade for active state */
-    }
+    .remove-listing-btn:hover { background-color: #970202; }
+    .remove-listing-btn:active { background-color: #6e0000; }
 </style>
-            </div>
-        </div>
 
         <!-- Combined Tab Section -->
         <div class="combined-tab-section">
@@ -548,29 +579,17 @@
                 <div id="equipment-details" class="tab-pane active">
                     <!-- Content from the previous 'tab-section' or top equipment details -->
                     <div class="tab-content">
-                        <!-- Placeholder for existing equipment details content -->
-                         <p>This is where the detailed equipment description and specs will go.</p>
-                         <p>Model: XYZ | Manufacturer: ABC</p>
-                         <h4>Technical Specifications</h4>
-                         <p>Details from PDF 1...</p>
-                         <h4>Instruction Manual</h4>
-                         <p>Details from PDF 2...</p>
-                         <h4>Terms and Conditions</h4>
-                         <p>Details from PDF 3...</p>
-                    </div>
+            <p>{{ equipment.description }}</p>
+            <p>Model: {{ equipment.model_number or 'N/A' }} | Manufacturer: {{ equipment.manufacturer or 'N/A' }}</p>
+        </div>
                 </div>
 
                 <!-- Safety Details Content -->
                 <div id="safety-details" class="tab-pane" style="display: none;">
                     <h2>Safety Requirements</h2>
                     <!-- Placeholder for existing safety requirements content -->
-                    <p>Kindly write the safety requirements here. This content will be pulled from the registration.</p>
-                    <ul>
-                        <li>Requirement 1: ...</li>
-                        <li>Requirement 2: ...</li>
-                    </ul>
+                    <p>{{ equipment.safety_requirements }}</p>
                 </div>
-
                 <!-- Reviews Content -->
                 <div id="reviews" class="tab-pane" style="display: none;">
                     <h2>User Reviews</h2>
@@ -591,5 +610,43 @@
             </div>
         </div>
     </div>
+    <!-- Star Rating Submission Form -->
+    <div style="text-align: center; margin-top: 20px;">
+        {% if current_user.is_authenticated and not current_user.is_university %}
+            <form method="post" action="{{ url_for('submit_rating', equipment_id=equipment.id) }}">
+                <label style="font-weight: bold; color: var(--primary-color);">Rate this equipment:</label><br>
+                <div class="star-rating">
+                    {% for i in range(1, 6) %}
+                        <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}" required /><label for="star{{ i }}" title="{{ i }} stars"></label>
+                    {% endfor %}
+                </div>
+                <button type="submit" class="right-btn" style="width: auto; padding: 8px 16px;">Submit Rating</button>
+            </form>
+        {% endif %}
+    </div>
+
+<style>
+    .star-rating {
+      display: inline-block;
+      font-size: 20px;
+    }
+
+    .star-rating input[type="radio"] {
+        display: none;
+    }
+
+    .star-rating label {
+      float: right;
+      color: #ddd;
+      padding: 2px;
+      cursor: pointer;
+    }
+
+    .star-rating label:hover,
+    .star-rating label:hover ~ label,
+    .star-rating input[type="radio"]:checked ~ label {
+      color: #f7b731;
+    }
+</style>
 </body>
 </html>

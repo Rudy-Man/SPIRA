@@ -726,8 +726,8 @@ footer {
 }
 
 .item-card {
-    width: 650px;  /* Further increased width */
-    height: 700px;  /* Further increased height */
+    width: 450px;  /* Further increased width */
+    height: 500px;  /* Further increased height */
     display: flex;
     flex-direction: column;
 }
@@ -750,12 +750,12 @@ footer {
 }
 
 .equipment-carousel .item-card-wrapper {
-    padding: 0 15px;
+    padding: 15px 15px;
 }
 
 .equipment-carousel .slick-prev,
 .equipment-carousel .slick-next {
-    position: absolute;
+    position: center;
     top: 50%;
     transform: translateY(-50%);
     z-index: 10;

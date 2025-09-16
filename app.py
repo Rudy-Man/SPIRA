@@ -5,7 +5,7 @@ from sqlalchemy import or_, func
 import math
 from werkzeug.utils import secure_filename
 from config import Config
-from models import db, User, Equipment, Booking 
+from models import db, User, Equipment, Booking, Rating 
 # --- Import login_required and the new form ---
 from flask_login import LoginManager, current_user, login_user, logout_user, login_required
 from forms import LoginForm, RegistrationForm, EquipmentForm, RentalRequestForm, UniversityApprovalForm
@@ -14,6 +14,7 @@ from authlib.integrations.flask_client import OAuth
 app = Flask(__name__)
 app.config.from_object(Config)
 db.init_app(app)
+
 
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
     os.makedirs(app.config['UPLOAD_FOLDER'])
@@ -213,6 +214,34 @@ def equipment_info(equipment_id):
         
     return render_template('equip_info.html', title=equipment.name, equipment=equipment, secondary_images=secondary_images)
 
+@app.route('/equipment/<int:equipment_id>/rate', methods=['POST'])
+@login_required
+def submit_rating(equipment_id):
+    if current_user.is_university:
+        flash("Universities can't rate their own equipment.", 'warning')
+        return redirect(url_for('equipment_info', equipment_id=equipment_id))
+
+    equipment = Equipment.query.get_or_404(equipment_id)
+    rating_value = request.form.get('rating')
+    
+    if not rating_value:
+        flash("Please select a rating.", 'error')
+        return redirect(url_for('equipment_info', equipment_id=equipment_id))
+
+    try:
+        rating_value = int(rating_value)
+        if not 1 <= rating_value <= 5:
+            raise ValueError
+    except ValueError:
+        flash("Invalid rating value.", 'error')
+        return redirect(url_for('equipment_info', equipment_id=equipment_id))
+
+    new_rating = Rating(user_id=current_user.id, equipment_id=equipment.id, rating=rating_value)
+    db.session.add(new_rating)
+    db.session.commit()
+    flash("Your rating has been submitted!", 'success')
+    return redirect(url_for('equipment_info', equipment_id=equipment_id))
+
 @app.route('/equipment/<int:equipment_id>/delete', methods=['POST'])
 @login_required
 def delete_equipment(equipment_id):
@@ -299,13 +328,21 @@ def market():
     # Get all universities to populate the filter dropdown
     all_universities = User.query.filter_by(is_university=True).order_by(User.username).all()
 
-    return render_template('market.html', title='Marketplace', equipment_list=filtered_equipment,
-                           universities=all_universities, search_term=search_term,
-                           selected_category=category, selected_university_id=university_id,
-                           slider_max_onsite=slider_max_onsite,
-                           slider_max_remote=slider_max_remote,
-                           selected_max_cost_onsite=float(max_cost_onsite_str),
-                           selected_max_cost_remote=float(max_cost_remote_str))
+    # Calculate average rating for each equipment in the list
+    for equipment in filtered_equipment:
+        equipment.average_rating = calculate_average_rating(equipment.id)
+    return render_template(
+        'market.html',
+        equipment_list=filtered_equipment,
+        universities=all_universities,
+        search_term=search_term,
+        selected_category=category,
+        selected_university_id=university_id,
+        slider_max_onsite=slider_max_onsite,
+        slider_max_remote=slider_max_remote,
+        selected_max_cost_onsite=float(max_cost_onsite_str),
+        selected_max_cost_remote=float(max_cost_remote_str)
+    )
     
 @app.route('/my_equipment')
 @login_required

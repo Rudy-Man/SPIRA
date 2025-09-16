@@ -155,9 +155,16 @@
                         <div class="equip-image">
                             {% if equipment.primary_image_filename %}
                                 <img src="{{ url_for('static', filename='uploads/' + equipment.primary_image_filename) }}" alt="{{ equipment.name }}" style="width:100%; height:100%; object-fit: cover;">
-                            {% else %}
+                            {% else %} 
                                 <i class="fas fa-flask"></i>
                             {% endif %}
+                        </div>
+                         <div class="equip-title">{{ equipment.name }}</div>
+                        <div class="equip-university">{{ equipment.university.username }}</div>
+                        <div class="equip-stars">
+                            {% for i in range(5) %}
+                                {% if i < equipment.average_rating %}&#9733;{% else %}&#9734;{% endif %}
+                            {% endfor %}
                         </div>
                         <div class="equip-title">{{ equipment.name }}</div>
                         <div class="equip-university">{{ equipment.university.username }}</div>
