@@ -13,7 +13,8 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
- 
+    {% include '_flash_toasts.html' %}
+
     <header>
         <div class="container">
             <a href="{{ url_for('index') }}" class="logo"> <i class="fas fa-flask-vial logo-icon"></i> SPIRA </a>

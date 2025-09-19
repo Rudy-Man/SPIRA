@@ -4,68 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ title }} - SPIRA</title>
-    
+
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    
+
     <link rel="stylesheet" href="{{ url_for('static', filename='css/forms.css') }}">
-    
+
     {% block head_content %}{% endblock %}
-    <style>
-        /* Styles for flash messages */
-        .flashes {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            width: 100%;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 9999;
-        }
-        .flashes li {
-            position: relative;
-            padding: 15px 40px 15px 15px; /* Add padding for close button */
-            margin-bottom: 0;
-            border: 1px solid transparent;
-            border-radius: 0;
-            color: white;
-            text-align: center;
-            font-weight: 600;
-        }
-        .flashes li.error,
-        .flashes li.success,
-        .flashes li.warning,
-        .flashes li.info { background-color: #e74c3c; }
-        .flashes .close-flash {
-            position: absolute;
-            top: 50%;
-            right: 15px;
-            transform: translateY(-50%);
-            color: white;
-            font-size: 22px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: color 0.2s;
-        }
-        .flashes .close-flash:hover {
-            color: #ddd;
-        }
-    </style>
 </head>
 <body>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <ul class="flashes">
-        {% for category, message in messages %}
-          <li class="{{ category or 'info' }}">
-            {{ message }}
-            <span class="close-flash" onclick="this.parentElement.style.display='none';">&times;</span>
-          </li>
-        {% endfor %}
-        </ul>
-      {% endif %}
-    {% endwith %}
+    {% include '_flash_toasts.html' %}
 
     {% block content %}{% endblock %}
 </body>

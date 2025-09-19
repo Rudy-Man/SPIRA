@@ -70,7 +70,23 @@
         .equip-image { width: 100%; height: 110px; background: var(--light-gray); border-radius: 6px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; color: var(--secondary-color); font-size: 2.2rem; }
         .equip-title { font-size: 1.1rem; font-weight: 600; color: var(--primary-color); margin-bottom: 2px; }
         .equip-university { font-size: 0.97rem; color: var(--secondary-color); margin-bottom: 4px; }
-        .equip-stars { color: #f7b731; font-size: 1.1rem; margin-bottom: 6px; }
+        .equip-rating { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+        .star-display { position: relative; display: inline-block; font-size: 1.1rem; line-height: 1; color: #4b4b4b; }
+        .star-display .star-row { display: block; white-space: nowrap; color: #555; }
+        .star-display .star-row.front { position: absolute; left: 0; top: 0; overflow: hidden; color: #f7b731; }
+        .rating-number { font-weight: 600; color: var(--light-text-color); }
+        .rating-count { font-size: 0.9rem; color: #b5b8d6; }
+        .rating-count.no-ratings { font-style: italic; color: #9aa0c5; font-weight: 500; }
+        .rating-filter-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+        .rating-filter-header .rating-clear-btn { background: none; border: none; color: var(--accent-color); font-weight: 600; cursor: pointer; padding: 0; font-size: 0.85rem; }
+        .rating-filter-header .rating-clear-btn:hover { color: var(--secondary-color); }
+        .filter-rating { display: inline-flex; align-items: center; gap: 6px; margin: 6px 0 10px 0; }
+        .filter-rating input[type="radio"] { display: none; }
+        .filter-star-label { font-size: 24px; color: #3d3f48; cursor: pointer; transition: color 0.2s ease; user-select: none; }
+        .filter-star-label.active { color: #f7b731; }
+        .filter-star-label:hover, .filter-star-label:focus { color: #f7b731; }
+        .reset-btn { margin-top: 8px; background: transparent; color: var(--accent-color); border-color: var(--accent-color); }
+        .reset-btn:hover { background: var(--accent-color); color: var(--bg-color); }
         .equip-view-btn { background: var(--bg-color); color: var(--primary-color); border: 1.5px solid var(--primary-color); border-radius: 4px; padding: 5px 16px; font-size: 0.95rem; font-weight: 600; cursor: pointer; margin-top: 6px; transition: background 0.2s, color 0.2s; text-decoration: none; text-align: center; }
         .equip-view-btn:hover { background: var(--light-gray); color: var(--secondary-color); border-color: var(--secondary-color); }
         @media (max-width: 1100px) { .main-flex { flex-direction: column; } .sidebar { width: 100%; border-right: none; border-bottom: 2px solid var(--border-color); padding: 18px 0 0 0; } .main-content { padding: 24px 10px; } .equipment-grid { grid-template-columns: 1fr 1fr; } }
@@ -86,6 +102,7 @@
     </style>
 </head>
 <body>
+    {% include '_flash_toasts.html' %}
     <div class="header-bar">
         <div class="logo">
             <a href="{{ url_for('index') }}" class="logo-anchor">
@@ -137,7 +154,21 @@
                     <span id="cost-remote-value" style="font-size:0.98em; color:#4a47a3; font-weight:600; margin-left:8px;"></span>
                     <input class="filter-select" id="cost-remote-text" type="number" placeholder="e.g., 500" style="width: 90%; margin-top: 10px;">
                 </div>
+                <div class="filter-section">
+                    <div class="filter-label rating-filter-header">
+                        <span>Minimum Rating</span>
+                        <button type="button" class="rating-clear-btn" id="rating-clear-btn">Clear</button>
+                    </div>
+                    <div class="filter-rating" data-selected="{{ selected_min_rating or 0 }}">
+                        {% for value in range(1, 6) %}
+                            <input type="radio" id="filter-star-{{ value }}" name="filter_star" value="{{ value }}" {% if selected_min_rating == value %}checked{% endif %}>
+                            <label class="filter-star-label{% if selected_min_rating and selected_min_rating >= value %} active{% endif %}" data-value="{{ value }}" for="filter-star-{{ value }}" title="{{ value }} star{% if value != 1 %}s{% endif %}">&#9733;</label>
+                        {% endfor %}
+                        <input type="hidden" name="min_rating" id="min-rating-input" value="{{ selected_min_rating if selected_min_rating else '' }}">
+                    </div>
+                </div>
                 <button type="submit" class="filter-btn">Apply Filters</button>
+                <button type="button" class="filter-btn reset-btn" id="reset-filters" data-reset-href="{{ url_for('market') }}">Reset Filters</button>
         </aside>
         <main class="main-content">
             <a href="{{ url_for('index') }}" class="btn btn-secondary" style="margin-bottom: 18px; display: inline-block;">&larr; Back to Home</a>
@@ -161,14 +192,18 @@
                         </div>
                          <div class="equip-title">{{ equipment.name }}</div>
                         <div class="equip-university">{{ equipment.university.username }}</div>
-                        <div class="equip-stars">
-                            {% for i in range(5) %}
-                                {% if i < equipment.average_rating %}&#9733;{% else %}&#9734;{% endif %}
-                            {% endfor %}
+                        <div class="equip-rating">
+                            <div class="star-display" aria-label="{% if equipment.ratings_count_display %}{{ '%.1f' % equipment.average_rating }} out of 5 stars{% else %}No ratings yet{% endif %}">
+                                <div class="star-row back">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                                <div class="star-row front" style="width: {{ '%.2f' % equipment.star_width }}%">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                            </div>
+                            {% if equipment.ratings_count_display %}
+                                <span class="rating-number">{{ '%.1f' % equipment.average_rating }}</span>
+                                <span class="rating-count">({{ equipment.ratings_count_display }})</span>
+                            {% else %}
+                                <span class="rating-count no-ratings">No ratings yet</span>
+                            {% endif %}
                         </div>
-                        <div class="equip-title">{{ equipment.name }}</div>
-                        <div class="equip-university">{{ equipment.university.username }}</div>
-                        <div class="equip-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
                         <a href="{{ url_for('equipment_info', equipment_id=equipment.id) }}" class="equip-view-btn">View More</a>
                     </div>
                 {% else %}
@@ -221,6 +256,69 @@
 
         setupSlider('cost-onsite-range', 'cost-onsite-value', 'cost-onsite-text');
         setupSlider('cost-remote-range', 'cost-remote-value', 'cost-remote-text');
+
+        const ratingContainer = document.querySelector('.filter-rating');
+        if (ratingContainer) {
+            const labels = Array.from(ratingContainer.querySelectorAll('.filter-star-label'));
+            const inputs = Array.from(ratingContainer.querySelectorAll('input[type="radio"]'));
+            const hiddenInput = document.getElementById('min-rating-input');
+            const clearBtn = document.getElementById('rating-clear-btn');
+
+            const applyActive = (value) => {
+                labels.forEach(label => {
+                    const labelValue = Number(label.dataset.value);
+                    label.classList.toggle('active', value && labelValue <= value);
+                });
+                ratingContainer.dataset.selected = value > 0 ? value : 0;
+            };
+
+            const setValue = (value) => {
+                hiddenInput.value = value > 0 ? value : '';
+                applyActive(value);
+            };
+
+            inputs.forEach(input => {
+                input.addEventListener('change', () => {
+                    setValue(Number(input.value));
+                });
+            });
+
+            labels.forEach(label => {
+                label.addEventListener('mouseenter', () => {
+                    applyActive(Number(label.dataset.value));
+                });
+                label.addEventListener('mouseleave', () => {
+                    const current = Number(hiddenInput.value || 0);
+                    applyActive(current);
+                });
+            });
+
+            if (clearBtn) {
+                clearBtn.addEventListener('click', () => {
+                    inputs.forEach(input => { input.checked = false; });
+                    setValue(0);
+                });
+            }
+
+            const initialValue = Number(ratingContainer.dataset.selected || 0);
+            if (initialValue) {
+                const match = inputs.find(input => Number(input.value) === initialValue);
+                if (match) {
+                    match.checked = true;
+                }
+            }
+            setValue(initialValue);
+        }
+
+        const resetBtn = document.getElementById('reset-filters');
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => {
+                const target = resetBtn.dataset.resetHref;
+                if (target) {
+                    window.location.href = target;
+                }
+            });
+        }
     });
     </script>
 </body>

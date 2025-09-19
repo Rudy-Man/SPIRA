@@ -5,10 +5,20 @@ from sqlalchemy import or_, func
 import math
 from werkzeug.utils import secure_filename
 from config import Config
-from models import db, User, Equipment, Booking, Rating 
+from models import db, User, Equipment, Booking, Rating, ReviewReply, calculate_average_rating, update_equipment_rating_cache
 # --- Import login_required and the new form ---
 from flask_login import LoginManager, current_user, login_user, logout_user, login_required
-from forms import LoginForm, RegistrationForm, EquipmentForm, RentalRequestForm, UniversityApprovalForm
+from forms import (
+    LoginForm,
+    RegistrationForm,
+    EquipmentForm,
+    RentalRequestForm,
+    UniversityApprovalForm,
+    ReviewForm,
+    DeleteReviewForm,
+    ReviewReplyForm,
+    DeleteReplyForm,
+)
 from authlib.integrations.flask_client import OAuth
 
 app = Flask(__name__)
@@ -58,29 +68,23 @@ def about():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        # If already logged in, redirect them to their respective home page
         if current_user.is_university:
             return redirect(url_for('my_equipment'))
-        else:
-            return redirect(url_for('index'))
-            
+        return redirect(url_for('index'))
+
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if user is None or not user.check_password(form.password.data):
-            flash('Invalid email or password', 'error')
-            return redirect(url_for('login'))
+            form.password.errors.append('Invalid email or password.')
+            return render_template('login.html', title='Sign In', form=form)
+
         login_user(user, remember=form.remember_me.data)
-        
-        # --- ADD THIS LOGIC ---
-        # Check if the user is a university and redirect accordingly
+        flash('Signed in successfully.', 'success')
         if user.is_university:
-            flash(f'Welcome, {user.username}!', 'success')
             return redirect(url_for('my_equipment'))
-        else:
-            flash(f'Welcome back, {user.username}!', 'success')
-            return redirect(url_for('index'))
-            
+        return redirect(url_for('index'))
+
     return render_template('login.html', title='Sign In', form=form)
 
 @app.route('/logout')
@@ -132,7 +136,7 @@ def google_callback():
             db.session.commit()
         
         login_user(user)
-        flash(f'Successfully logged in with Google, {user.username}!', 'success')
+        flash('Signed in successfully with Google.', 'success')
         
         # --- ADD THIS LOGIC ---
         if user.is_university:
@@ -204,43 +208,160 @@ def register_equipment():
 
 
 
+def _get_secondary_images(equipment):
+    secondary_images = []
+    if equipment.secondary_images_filenames:
+        if isinstance(equipment.secondary_images_filenames, str):
+            secondary_images = json.loads(equipment.secondary_images_filenames)
+        else:
+            secondary_images = equipment.secondary_images_filenames
+    return secondary_images
+
+
+def _gather_equipment_page_context(equipment, review_form=None, edit_review_id=None):
+    secondary_images = _get_secondary_images(equipment)
+    reviews = Rating.query.filter_by(equipment_id=equipment.id).order_by(Rating.created_at.desc()).all()
+    ratings_count = len(reviews)
+    avg_rating = round(sum(review.rating for review in reviews) / ratings_count, 1) if ratings_count else 0
+    star_width = (avg_rating / 5) * 100 if ratings_count else 0
+
+    if review_form is None and current_user.is_authenticated and not current_user.is_university:
+        review_form = ReviewForm()
+
+    target_review = None
+    if edit_review_id and current_user.is_authenticated:
+        target_review = next((r for r in reviews if r.id == edit_review_id and r.user_id == current_user.id), None)
+        if target_review:
+            if review_form is None:
+                review_form = ReviewForm()
+            review_form.review_id.data = str(target_review.id)
+            review_form.rating.data = target_review.rating
+            review_form.comment.data = target_review.comment or ''
+
+    user_reviews = []
+    if current_user.is_authenticated:
+        user_reviews = [review for review in reviews if review.user_id == current_user.id]
+
+    delete_review_forms = {
+        review.id: DeleteReviewForm(review_id=str(review.id))
+        for review in reviews
+    }
+
+    return dict(
+        title=equipment.name,
+        equipment=equipment,
+        secondary_images=secondary_images,
+        reviews=reviews,
+        ratings_count=ratings_count,
+        avg_rating=avg_rating,
+        star_width=star_width,
+        review_form=review_form,
+        edit_review_id=target_review.id if target_review else None,
+        user_reviews=user_reviews,
+        delete_review_forms=delete_review_forms,
+    )
+
+
 @app.route('/equipment/<int:equipment_id>')
 def equipment_info(equipment_id):
     equipment = Equipment.query.get_or_404(equipment_id)
-    # The secondary images are stored as a JSON string, so we need to load it
-    secondary_images = []
-    if equipment.secondary_images_filenames:
-        secondary_images = json.loads(equipment.secondary_images_filenames)
-        
-    return render_template('equip_info.html', title=equipment.name, equipment=equipment, secondary_images=secondary_images)
+    edit_review_id = request.args.get('edit_review_id', type=int)
+    context = _gather_equipment_page_context(equipment, edit_review_id=edit_review_id)
+    return render_template('equip_info.html', **context)
 
-@app.route('/equipment/<int:equipment_id>/rate', methods=['POST'])
+
+@app.route('/equipment/<int:equipment_id>/reviews', methods=['POST'])
 @login_required
-def submit_rating(equipment_id):
+def submit_review(equipment_id):
+    equipment = Equipment.query.get_or_404(equipment_id)
     if current_user.is_university:
         flash("Universities can't rate their own equipment.", 'warning')
         return redirect(url_for('equipment_info', equipment_id=equipment_id))
 
+    form = ReviewForm()
+    if form.validate_on_submit():
+        review_id = form.review_id.data
+        review = None
+        if review_id:
+            try:
+                review_id = int(review_id)
+            except (TypeError, ValueError):
+                review_id = None
+
+        if review_id:
+            review = Rating.query.filter_by(
+                id=review_id,
+                equipment_id=equipment.id,
+                user_id=current_user.id
+            ).first()
+            if not review:
+                flash('Review not found or you do not have permission to edit it.', 'error')
+                return redirect(url_for('equipment_info', equipment_id=equipment.id, _anchor='reviews'))
+
+        created_new = False
+        if not review:
+            review = Rating(equipment_id=equipment.id, user_id=current_user.id)
+            db.session.add(review)
+            created_new = True
+
+        review.rating = form.rating.data
+        review.comment = form.comment.data.strip()
+        db.session.commit()
+        update_equipment_rating_cache(equipment.id)
+
+        flash('Your review has been {}!'.format('submitted' if created_new else 'updated'), 'success')
+        return redirect(url_for('equipment_info', equipment_id=equipment.id, _anchor='reviews'))
+
+    for field_errors in form.errors.values():
+        for error in field_errors:
+            flash(error, 'error')
+
+    edit_id = None
+    if form.review_id.data:
+        try:
+            edit_id = int(form.review_id.data)
+        except (TypeError, ValueError):
+            edit_id = None
+
+    context = _gather_equipment_page_context(
+        equipment,
+        review_form=form,
+        edit_review_id=edit_id
+    )
+    response = render_template('equip_info.html', **context)
+    return response, 400
+
+
+@app.route('/equipment/<int:equipment_id>/reviews/<int:review_id>/delete', methods=['POST'])
+@login_required
+def delete_review(equipment_id, review_id):
     equipment = Equipment.query.get_or_404(equipment_id)
-    rating_value = request.form.get('rating')
-    
-    if not rating_value:
-        flash("Please select a rating.", 'error')
-        return redirect(url_for('equipment_info', equipment_id=equipment_id))
+    review = Rating.query.filter_by(id=review_id, equipment_id=equipment.id).first_or_404()
+
+    if review.user_id != current_user.id:
+        flash('You do not have permission to delete this review.', 'error')
+        return redirect(url_for('equipment_info', equipment_id=equipment.id, _anchor='reviews'))
+
+    form = DeleteReviewForm()
+    if not form.validate_on_submit() or not form.review_id.data:
+        flash('Invalid delete request.', 'error')
+        return redirect(url_for('equipment_info', equipment_id=equipment.id, _anchor='reviews'))
 
     try:
-        rating_value = int(rating_value)
-        if not 1 <= rating_value <= 5:
-            raise ValueError
-    except ValueError:
-        flash("Invalid rating value.", 'error')
-        return redirect(url_for('equipment_info', equipment_id=equipment_id))
+        form_review_id = int(form.review_id.data)
+    except (TypeError, ValueError):
+        flash('Invalid delete request.', 'error')
+        return redirect(url_for('equipment_info', equipment_id=equipment.id, _anchor='reviews'))
 
-    new_rating = Rating(user_id=current_user.id, equipment_id=equipment.id, rating=rating_value)
-    db.session.add(new_rating)
+    if form_review_id != review.id:
+        flash('Invalid delete request.', 'error')
+        return redirect(url_for('equipment_info', equipment_id=equipment.id, _anchor='reviews'))
+
+    db.session.delete(review)
     db.session.commit()
-    flash("Your rating has been submitted!", 'success')
-    return redirect(url_for('equipment_info', equipment_id=equipment_id))
+    update_equipment_rating_cache(equipment.id)
+    flash('Your review has been deleted.', 'success')
+    return redirect(url_for('equipment_info', equipment_id=equipment.id, _anchor='reviews'))
 
 @app.route('/equipment/<int:equipment_id>/delete', methods=['POST'])
 @login_required
@@ -264,6 +385,7 @@ def market():
     search_term = request.args.get('search', '').strip()
     category = request.args.get('category', '')
     university_id_str = request.args.get('university_id', '')
+    min_rating_str = request.args.get('min_rating', '').strip()
 
     # Find the global maximum costs to set the slider range dynamically
     global_max_onsite = db.session.query(func.max(Equipment.cost_onsite)).scalar() or 0
@@ -277,6 +399,13 @@ def market():
     max_cost_onsite_str = request.args.get('max_cost_onsite', str(slider_max_onsite))
     max_cost_remote_str = request.args.get('max_cost_remote', str(slider_max_remote))
     university_id = int(university_id_str) if university_id_str.isdigit() else None
+
+    try:
+        min_rating = int(min_rating_str)
+        if not 1 <= min_rating <= 5:
+            min_rating = 0
+    except (ValueError, TypeError):
+        min_rating = 0
 
     try:
         max_cost_onsite = float(max_cost_onsite_str)
@@ -314,6 +443,9 @@ def market():
     if university_id:
         query = query.filter(Equipment.university_id == university_id)
 
+    if min_rating:
+        query = query.filter(Equipment.average_rating_cache != None, Equipment.average_rating_cache >= min_rating)
+
     # Apply cost filters only if a max value is set
     if max_cost_onsite is not None:
         # Filter for equipment that has a defined on-site cost less than or equal to the max
@@ -328,9 +460,13 @@ def market():
     # Get all universities to populate the filter dropdown
     all_universities = User.query.filter_by(is_university=True).order_by(User.username).all()
 
-    # Calculate average rating for each equipment in the list
+    # Calculate average rating and rating count for each equipment in the list
     for equipment in filtered_equipment:
-        equipment.average_rating = calculate_average_rating(equipment.id)
+        avg_rating = calculate_average_rating(equipment.id) or 0
+        ratings_count = equipment.ratings_count_cache or 0
+        equipment.average_rating = avg_rating
+        equipment.ratings_count_display = ratings_count
+        equipment.star_width = (avg_rating / 5) * 100 if ratings_count else 0
     return render_template(
         'market.html',
         equipment_list=filtered_equipment,
@@ -341,7 +477,8 @@ def market():
         slider_max_onsite=slider_max_onsite,
         slider_max_remote=slider_max_remote,
         selected_max_cost_onsite=float(max_cost_onsite_str),
-        selected_max_cost_remote=float(max_cost_remote_str)
+        selected_max_cost_remote=float(max_cost_remote_str),
+        selected_min_rating=min_rating
     )
     
 @app.route('/my_equipment')

@@ -149,6 +149,12 @@
             font-size: 1.1rem;
             margin-bottom: 10px;
         }
+        .rating-summary {
+            color: var(--secondary-color);
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
         .calendar {
             width: 100%;
             max-width: 260px;
@@ -283,6 +289,170 @@
             border-bottom: 2px dashed var(--secondary-color);
             width: 100%;
             height: 18px;
+        }
+        .reviews-wrapper {
+            margin-top: 12px;
+        }
+        .review-item {
+            background: #f7f7fc;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 12px 16px;
+            margin-bottom: 12px;
+        }
+        .review-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+        .review-author {
+            color: var(--primary-color);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .review-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .review-stars {
+            color: #f7b731;
+            font-size: 1rem;
+            letter-spacing: 2px;
+        }
+        .review-actions {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .review-delete-form {
+            display: inline-flex;
+            margin: 0;
+        }
+        .review-delete-btn {
+            background: transparent;
+            border: 1px solid #b71c1c;
+            color: #b71c1c;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s ease-in-out, color 0.2s ease-in-out;
+        }
+        .review-delete-btn:hover {
+            background: #b71c1c;
+            color: #fff;
+        }
+        .review-comment {
+            margin: 0;
+            color: #26324b;
+            line-height: 1.4;
+        }
+        .review-form-wrapper {
+            margin-top: 24px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 18px;
+        }
+        .review-form-title {
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            text-align: left;
+        }
+        .review-form {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .star-rating-input {
+            display: inline-flex;
+            flex-direction: row-reverse;
+            gap: 6px;
+        }
+        .star-rating-input input[type="radio"] {
+            display: none;
+        }
+        .star-rating-input label {
+            font-size: 28px;
+            line-height: 1;
+            color: #d1d1d1;
+            cursor: pointer;
+            transition: color 0.2s ease-in-out;
+        }
+        .star-rating-input input[type="radio"]:checked + label,
+        .star-rating-input input[type="radio"]:checked ~ label,
+        .star-rating-input label:hover,
+        .star-rating-input label:hover ~ label {
+            color: #f7b731;
+        }
+        .star-display {
+            position: relative;
+            display: inline-block;
+            font-size: 1.2rem;
+            line-height: 1;
+            color: #d1d1d1;
+        }
+        .star-display .star-row {
+            display: block;
+            white-space: nowrap;
+        }
+        .star-display .star-row.front {
+            position: absolute;
+            left: 0;
+            top: 0;
+            overflow: hidden;
+            color: #f7b731;
+        }
+        .review-textarea {
+            width: 100%;
+            min-height: 110px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 10px;
+            font-size: 1rem;
+            resize: vertical;
+            font-family: 'Poppins', sans-serif;
+        }
+        .review-submit-btn {
+            width: auto;
+            align-self: flex-start;
+        }
+        .login-prompt {
+            margin-top: 16px;
+            color: var(--secondary-color);
+            font-weight: 600;
+        }
+        .no-reviews {
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+        .review-edit-link {
+            color: var(--accent-color);
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .review-edit-link:hover {
+            color: var(--secondary-color);
+        }
+        .review-switch-link {
+            display: inline-block;
+            color: var(--accent-color);
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .review-switch-link:hover {
+            color: var(--secondary-color);
+        }
+        .review-hint {
+            color: var(--secondary-color);
+            font-size: 0.9rem;
         }
         @media (max-width: 900px) {
             .main-container { padding: 0 0 24px 0; }
@@ -450,7 +620,8 @@
     });
     </script>
 </head>
-<body>
+<body data-default-tab="{% if edit_review_id or (review_form and (review_form.review_id.data or review_form.errors)) %}reviews{% elif request.args.get('tab') %}{{ request.args.get('tab') }}{% endif %}">
+    {% include '_flash_toasts.html' %}
     <div class="nav-bar">
         <a href="{{ url_for('index') }}" class="nav-btn">Home</a>
         <a href="{{ url_for('market') }}" class="nav-btn">Marketplace</a>
@@ -497,17 +668,28 @@
                     <a href="{{ url_for('my_equipment') }}"><span class="uni-icon"><i class="fas fa-user-circle"></i></span></a>
                     <span class="uni-name">{{ equipment.university.username }}</span>
                 </div>
-                {% if equipment.ratings %}
+                {% set has_ratings = ratings_count > 0 %}
+                {% if has_ratings %}
+                    {% set rating_width = star_width %}
+                    {% set rating_aria = ('%.1f' % avg_rating) ~ ' out of 5 stars' %}
+                {% else %}
+                    {% set rating_width = 0 %}
+                    {% set rating_aria = 'No ratings yet' %}
+                {% endif %}
                 <div class="stars">
-                    {% set average_rating = equipment.average_rating() %}
-                    {% for i in range(5) %}
-                        {% if i < average_rating %}
-                            &#9733;  <!-- Filled star -->
-                        {% else %}
-                            &#9734;  <!-- Empty star -->
-                        {% endif %}
-                    {% endfor %}
+                    <div class="star-display" aria-label="{{ rating_aria }}">
+                        <div class="star-row back">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                        <div class="star-row front" style="width: {{ '%.2f' % rating_width }}%;">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                    </div>
                 </div>
+                <div class="rating-summary">
+                    {% if has_ratings %}
+                        <span class="rating-value">{{ '%.1f' % avg_rating }} / 5 ({{ ratings_count }} rating{% if ratings_count != 1 %}s{% endif %})</span>
+                    {% else %}
+                        <span class="rating-value">No ratings yet</span>
+                    {% endif %}
+                </div>
+
                 <div class="calendar">
                     <div id="selected-date" style="font-weight:bold; color:#4a47a3; margin-bottom: 8px;"></div>
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 8px;">
@@ -560,7 +742,7 @@
     .remove-listing-btn {
         background-color: #cf0000; /* Darker red */
         color: white;
-        padding: 12px 20px; /* Increased padding */
+            padding: 12px 20px;
     }
     .remove-listing-btn:hover { background-color: #970202; }
     .remove-listing-btn:active { background-color: #6e0000; }
@@ -593,60 +775,86 @@
                 <!-- Reviews Content -->
                 <div id="reviews" class="tab-pane" style="display: none;">
                     <h2>User Reviews</h2>
-                    <!-- Content from the previous 'feedback-section' -->
-                    <div class="feedback-section">
-                         <!-- Placeholder for existing feedback/reviews content -->
-                         <p>This is where the list of user reviews will be displayed.</p>
-                         <div class="feedback-item">
-                             <span class="feedback-icon"><i class="fas fa-user-circle"></i></span>
-                             <div class="feedback-line">User A: Great equipment!</div>
-                         </div>
-                          <div class="feedback-item">
-                             <span class="feedback-icon"><i class="fas fa-user-circle"></i></span>
-                             <div class="feedback-line">User B: Very useful for my research.</div>
-                         </div>
+                    <div class="reviews-wrapper">
+                        {% if reviews %}
+                            {% for review in reviews %}
+                                <div class="review-item">
+                                    <div class="review-header">
+                                        <span class="review-author"><i class="fas fa-user-circle"></i> {{ review.user.username }}</span>
+                                        <span class="review-meta">
+                                            <span class="review-stars">
+                                                {% for _ in range(review.rating) %}
+                                                    &#9733;
+                                                {% endfor %}
+                                                {% for _ in range(5 - review.rating) %}
+                                                    &#9734;
+                                                {% endfor %}
+                                            </span>
+                                            {% if current_user.is_authenticated and review.user_id == current_user.id %}
+                                                <span class="review-actions">
+                                                    <a class="review-edit-link" href="{{ url_for('equipment_info', equipment_id=equipment.id, edit_review_id=review.id, _anchor='reviews') }}">Edit</a>
+                                                    {% set delete_form = delete_review_forms.get(review.id) %}
+                                                    {% if delete_form %}
+                                                        <form method="post" action="{{ url_for('delete_review', equipment_id=equipment.id, review_id=review.id) }}" class="review-delete-form" onsubmit="return confirm('Delete this review?');">
+                                                            {{ delete_form.hidden_tag() }}
+                                                            {{ delete_form.review_id() }}
+                                                            <button type="submit" class="review-delete-btn">Delete</button>
+                                                        </form>
+                                                    {% endif %}
+                                                </span>
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                    {% if review.comment %}
+                                        <p class="review-comment">{{ review.comment }}</p>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="no-reviews">No reviews yet. Be the first to share your experience!</p>
+                        {% endif %}
                     </div>
+                    {% if review_form %}
+                        <div class="review-form-wrapper" id="leave-review">
+                            <h3 class="review-form-title">{% if review_form.review_id.data %}Update Your Review{% else %}Leave a Review{% endif %}</h3>
+                            {% if review_form.review_id.data %}
+                                <p class="login-prompt" style="margin-top: 0;">
+                                    Editing your review. <a href="{{ url_for('equipment_info', equipment_id=equipment.id, _anchor='reviews') }}" style="color: var(--accent-color); text-decoration: none; font-weight: 700;">Cancel</a>
+                                </p>
+                            {% endif %}
+                            <form method="post" action="{{ url_for('submit_review', equipment_id=equipment.id) }}" class="review-form">
+                                {{ review_form.hidden_tag() }}
+                                {{ review_form.review_id() }}
+                                <div>
+                                    <span style="font-weight:600; color: var(--primary-color);">Your rating:</span>
+                                    <div class="star-rating-input" data-initial-value="{{ review_form.rating.data or 0 }}">
+                                        {% for value in range(1, 6) %}
+                                            <input type="radio" id="review-star-{{ value }}" name="{{ review_form.rating.name }}" value="{{ value }}" {% if review_form.rating.data == value %}checked{% endif %}>
+                                            <label class="star-rating-label{% if review_form.rating.data and review_form.rating.data >= value %} active{% endif %}" data-value="{{ value }}" for="review-star-{{ value }}" title="{{ value }} star{% if value != 1 %}s{% endif %}">&#9733;</label>
+                                        {% endfor %}
+                                    </div>
+                                    {% for error in review_form.rating.errors %}
+                                        <div class="form-error">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                                <div>
+                                    <label for="{{ review_form.comment.id }}" style="font-weight:600; color: var(--primary-color);">Your experience:</label>
+                                    {{ review_form.comment(class_='review-textarea') }}
+                                    {% for error in review_form.comment.errors %}
+                                        <div class="form-error">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                                <button type="submit" class="right-btn review-submit-btn">{% if review_form.review_id.data %}Update Review{% else %}Submit Review{% endif %}</button>
+                            </form>
+                        </div>
+                    {% elif current_user.is_authenticated and current_user.is_university %}
+                        <p class="login-prompt">University accounts cannot leave reviews.</p>
+                    {% else %}
+                        <p class="login-prompt">Please <a href="{{ url_for('login') }}" style="color: var(--accent-color); text-decoration: none; font-weight: 700;">sign in</a> to leave a review.</p>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
-    <!-- Star Rating Submission Form -->
-    <div style="text-align: center; margin-top: 20px;">
-        {% if current_user.is_authenticated and not current_user.is_university %}
-            <form method="post" action="{{ url_for('submit_rating', equipment_id=equipment.id) }}">
-                <label style="font-weight: bold; color: var(--primary-color);">Rate this equipment:</label><br>
-                <div class="star-rating">
-                    {% for i in range(1, 6) %}
-                        <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}" required /><label for="star{{ i }}" title="{{ i }} stars"></label>
-                    {% endfor %}
-                </div>
-                <button type="submit" class="right-btn" style="width: auto; padding: 8px 16px;">Submit Rating</button>
-            </form>
-        {% endif %}
-    </div>
-
-<style>
-    .star-rating {
-      display: inline-block;
-      font-size: 20px;
-    }
-
-    .star-rating input[type="radio"] {
-        display: none;
-    }
-
-    .star-rating label {
-      float: right;
-      color: #ddd;
-      padding: 2px;
-      cursor: pointer;
-    }
-
-    .star-rating label:hover,
-    .star-rating label:hover ~ label,
-    .star-rating input[type="radio"]:checked ~ label {
-      color: #f7b731;
-    }
-</style>
 </body>
 </html>
