@@ -1,12 +1,12 @@
 import os
 import json
-from flask import Flask, render_template, redirect, url_for, flash, request
-from sqlalchemy import or_, func
+from datetime import date, timedelta
+from flask import Flask, render_template, redirect, url_for, flash, request, session
+from sqlalchemy import or_, func, text, inspect
 import math
 from werkzeug.utils import secure_filename
 from config import Config
-from models import db, User, Equipment, Booking, Rating, ReviewReply, calculate_average_rating, update_equipment_rating_cache
-# --- Import login_required and the new form ---
+from models import db, User, Equipment, Booking, Rating, ReviewReply, EquipmentBlockedDate, calculate_average_rating, update_equipment_rating_cache, get_blocked_dates, get_booking_blocked_dates, get_manual_closed_dates
 from flask_login import LoginManager, current_user, login_user, logout_user, login_required
 from forms import (
     LoginForm,
@@ -18,8 +18,11 @@ from forms import (
     DeleteReviewForm,
     ReviewReplyForm,
     DeleteReplyForm,
+    ManageAvailabilityForm,
+    RemoveBlockedDateForm,
 )
 from authlib.integrations.flask_client import OAuth
+from flask_wtf.csrf import generate_csrf
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -47,6 +50,38 @@ oauth.register(
     client_kwargs={'scope': 'openid email profile'}
 )
 # -----------------------------------
+
+# --- Profile context processor ---
+@app.context_processor
+def inject_profile_data():
+    if not current_user.is_authenticated:
+        return {}
+    try:
+        if current_user.is_university:
+            eq_ids = [r[0] for r in Equipment.query.filter_by(university_id=current_user.id).with_entities(Equipment.id).all()]
+            equipment_count = len(eq_ids)
+            total_bookings = Booking.query.filter(Booking.equipment_id.in_(eq_ids)).count() if eq_ids else 0
+            approved_bookings = Booking.query.filter(Booking.equipment_id.in_(eq_ids), Booking.status == 'Approved').count() if eq_ids else 0
+            recent_bookings = (Booking.query.filter(Booking.equipment_id.in_(eq_ids))
+                               .order_by(Booking.created_at.desc()).limit(3).all()) if eq_ids else []
+            return dict(profile_data={
+                'equipment_count': equipment_count,
+                'total_bookings': total_bookings,
+                'approved_bookings': approved_bookings,
+                'recent_bookings': recent_bookings,
+            })
+        else:
+            total_requests = Booking.query.filter_by(user_id=current_user.id).count()
+            approved_requests = Booking.query.filter_by(user_id=current_user.id, status='Approved').count()
+            recent_requests = (Booking.query.filter_by(user_id=current_user.id)
+                               .order_by(Booking.created_at.desc()).limit(3).all())
+            return dict(profile_data={
+                'total_requests': total_requests,
+                'approved_requests': approved_requests,
+                'recent_requests': recent_requests,
+            })
+    except Exception:
+        return {}
 
 # --- Routes ---
 @app.route('/')
@@ -110,7 +145,8 @@ def register():
 
 @app.route('/google/login')
 def google_login():
-    # Redirect to Google's authorization page
+    user_type = request.args.get('user_type', 'user')
+    session['google_user_type'] = user_type
     return oauth.google.authorize_redirect(url_for('google_callback', _external=True))
 
 # In app.py
@@ -125,12 +161,11 @@ def google_callback():
     if user_info:
         user = User.query.filter_by(email=user_info['email']).first()
         if not user:
-            # Note: You may want a separate process for universities to register via Google
-            # For now, we assume they are regular users if they don't exist
+            google_user_type = session.pop('google_user_type', 'user')
             user = User(
                 username=user_info['name'],
                 email=user_info['email'],
-                is_university=False # Default to False
+                is_university=(google_user_type == 'university')
             )
             db.session.add(user)
             db.session.commit()
@@ -182,6 +217,8 @@ def register_equipment():
                 file_field.data.save(file_path)
                 return unique_filename
             return None
+
+        new_equipment.available_days = ','.join(form.available_days.data) if form.available_days.data else '0,1,2,3,4'
 
         new_equipment.primary_image_filename = save_file(form.primary_image, 'primary')
         new_equipment.tech_specs_pdf_filename = save_file(form.tech_specs_pdf, 'specs')
@@ -247,6 +284,10 @@ def _gather_equipment_page_context(equipment, review_form=None, edit_review_id=N
         for review in reviews
     }
 
+    available_days = [int(d) for d in (equipment.available_days or '0,1,2,3,4').split(',') if d.strip()]
+    booked_dates = get_booking_blocked_dates(equipment.id)
+    manual_closed_dates = get_manual_closed_dates(equipment.id)
+
     return dict(
         title=equipment.name,
         equipment=equipment,
@@ -259,6 +300,9 @@ def _gather_equipment_page_context(equipment, review_form=None, edit_review_id=N
         edit_review_id=target_review.id if target_review else None,
         user_reviews=user_reviews,
         delete_review_forms=delete_review_forms,
+        available_days=available_days,
+        booked_dates=booked_dates,
+        manual_closed_dates=manual_closed_dates,
     )
 
 
@@ -491,7 +535,7 @@ def my_equipment():
     # Fetch equipment listed by the currently logged-in university
     university_equipment = Equipment.query.filter_by(university_id=current_user.id).all()
     bookings = Booking.query.join(Equipment).filter(Equipment.university_id == current_user.id).order_by(Booking.created_at.desc()).all()
-    return render_template('uni_home.html', title='My Equipment', equipment_list=university_equipment, bookings=bookings)
+    return render_template('uni_home.html', title='My Equipment', equipment_list=university_equipment, bookings=bookings, csrf_token_val=generate_csrf())
 
 @app.route('/equipment/<int:equipment_id>/request', methods=['GET', 'POST'])
 @login_required
@@ -499,23 +543,69 @@ def request_equipment(equipment_id):
     equipment = Equipment.query.get_or_404(equipment_id)
     form = RentalRequestForm()
 
+    available_days = [int(d) for d in (equipment.available_days or '0,1,2,3,4').split(',') if d.strip()]
+    booked_dates = get_booking_blocked_dates(equipment_id)
+    manual_closed_dates = get_manual_closed_dates(equipment_id)
+    all_blocked = set(booked_dates) | set(manual_closed_dates)
+
     if form.validate_on_submit():
-        # Create a new booking record
-        new_booking = Booking(
-            user_id=current_user.id,
-            equipment_id=equipment.id,
-            experiment_description=form.experiment_description.data,
-            samples_list=form.samples_list.data
-        )
-        db.session.add(new_booking)
-        db.session.commit()
-        
-        flash('Your request has been sent to the university!', 'success')
-        # This will eventually redirect to a page for Step 3 (Processing)
-        return redirect(url_for('equipment_info', equipment_id=equipment.id))
-        
-    # We will use purchase.html for this page
-    return render_template('purchase.html', title='Request Equipment', form=form, equipment=equipment)
+        raw = form.selected_dates.data or ''
+        try:
+            selected = json.loads(raw) if raw else []
+            if not isinstance(selected, list) or len(selected) == 0:
+                raise ValueError('empty')
+        except (ValueError, TypeError):
+            flash('Please select at least one date on the calendar.', 'error')
+            selected = []
+
+        if selected:
+            from datetime import datetime as dt_parse
+            errors = []
+            parsed = []
+            for s in selected:
+                try:
+                    d = dt_parse.strptime(s, '%Y-%m-%d').date()
+                except ValueError:
+                    errors.append(f'Invalid date: {s}')
+                    break
+                if d < date.today():
+                    errors.append(f'{s} is in the past.')
+                    break
+                if d.weekday() not in available_days:
+                    errors.append(f'{d.strftime("%A %b %d")} is not an available day.')
+                    break
+                if s in all_blocked:
+                    errors.append(f'{d.strftime("%A %b %d")} is already booked or closed.')
+                    break
+                parsed.append(d)
+
+            if errors:
+                for msg in errors:
+                    flash(msg, 'error')
+            else:
+                new_booking = Booking(
+                    user_id=current_user.id,
+                    equipment_id=equipment.id,
+                    start_date=min(parsed),
+                    end_date=max(parsed),
+                    selected_dates=selected,
+                    experiment_description=form.experiment_description.data,
+                    samples_list=form.samples_list.data
+                )
+                db.session.add(new_booking)
+                db.session.commit()
+                flash('Your request has been sent to the university!', 'success')
+                return redirect(url_for('equipment_info', equipment_id=equipment.id))
+
+    return render_template(
+        'purchase.html',
+        title='Request Equipment',
+        form=form,
+        equipment=equipment,
+        available_days_json=json.dumps(available_days),
+        booked_dates_json=json.dumps(booked_dates),
+        manual_closed_json=json.dumps(manual_closed_dates),
+    )
 
 @app.route('/booking/<int:booking_id>/manage', methods=['GET', 'POST'])
 @login_required
@@ -533,16 +623,55 @@ def manage_booking(booking_id):
             booking.final_cost = form.final_cost.data
         if form.university_notes.data:
             booking.university_notes = form.university_notes.data
-        
+
+        # Auto-block dates when a booking is approved
+        if form.status.data == 'Approved':
+            from datetime import datetime as dt_parse
+            dates_to_block = []
+            if booking.selected_dates:
+                dates_to_block = [dt_parse.strptime(s, '%Y-%m-%d').date() for s in booking.selected_dates]
+            elif booking.start_date and booking.end_date:
+                # legacy bookings without selected_dates — block the full range
+                cur = booking.start_date
+                while cur <= booking.end_date:
+                    dates_to_block.append(cur)
+                    cur += timedelta(days=1)
+            for d in dates_to_block:
+                existing = EquipmentBlockedDate.query.filter_by(
+                    equipment_id=booking.equipment_id, date=d
+                ).first()
+                if not existing:
+                    db.session.add(EquipmentBlockedDate(
+                        equipment_id=booking.equipment_id,
+                        date=d,
+                        booking_id=booking.id
+                    ))
+
         db.session.commit()
         flash('Booking has been updated successfully.', 'success')
         return redirect(url_for('my_equipment'))
 
     # Pre-populate form on GET request
+    form.status.data = booking.status
     form.university_notes.data = booking.university_notes
     form.final_cost.data = booking.final_cost
 
     return render_template('manage_booking.html', title='Manage Booking', form=form, booking=booking)
+
+@app.route('/booking/<int:booking_id>/delete', methods=['POST'])
+@login_required
+def delete_booking(booking_id):
+    booking = Booking.query.get_or_404(booking_id)
+    if not current_user.is_university or booking.equipment.university_id != current_user.id:
+        flash('You do not have permission to cancel this booking.', 'error')
+        return redirect(url_for('my_equipment'))
+    # Release any dates that were blocked by this booking
+    EquipmentBlockedDate.query.filter_by(booking_id=booking.id).delete()
+    db.session.delete(booking)
+    db.session.commit()
+    flash('Booking has been cancelled and its dates are now available again.', 'success')
+    return redirect(url_for('my_equipment'))
+
 
 @app.route('/my_orders')
 @login_required
@@ -555,9 +684,108 @@ def my_orders():
     bookings = Booking.query.filter_by(user_id=current_user.id).order_by(Booking.created_at.desc()).all()
     return render_template('user_orders.html', title="My Requests", bookings=bookings)
 
+
+@app.route('/equipment/<int:equipment_id>/availability', methods=['GET', 'POST'])
+@login_required
+def manage_availability(equipment_id):
+    equipment = Equipment.query.get_or_404(equipment_id)
+    if not current_user.is_university or equipment.university_id != current_user.id:
+        flash('You do not have permission to manage this equipment.', 'error')
+        return redirect(url_for('my_equipment'))
+
+    form = ManageAvailabilityForm()
+    remove_form = RemoveBlockedDateForm()
+
+    if request.method == 'POST':
+        action = request.form.get('action')
+
+        if action == 'save_schedule' and form.validate_on_submit():
+            equipment.available_days = ','.join(form.available_days.data) if form.available_days.data else '0,1,2,3,4'
+            if form.block_start.data and form.block_end.data:
+                if form.block_end.data < form.block_start.data:
+                    flash('Block end date must be on or after block start date.', 'error')
+                else:
+                    current_day = form.block_start.data
+                    while current_day <= form.block_end.data:
+                        existing = EquipmentBlockedDate.query.filter_by(
+                            equipment_id=equipment.id, date=current_day
+                        ).first()
+                        if not existing:
+                            db.session.add(EquipmentBlockedDate(
+                                equipment_id=equipment.id,
+                                date=current_day,
+                                booking_id=None
+                            ))
+                        current_day += timedelta(days=1)
+            db.session.commit()
+            flash('Availability updated successfully.', 'success')
+            return redirect(url_for('manage_availability', equipment_id=equipment_id))
+
+        elif action == 'remove_date' and remove_form.validate_on_submit():
+            from datetime import datetime as dt
+            try:
+                target_date = dt.strptime(remove_form.date.data, '%Y-%m-%d').date()
+            except ValueError:
+                flash('Invalid date.', 'error')
+                return redirect(url_for('manage_availability', equipment_id=equipment_id))
+            blocked = EquipmentBlockedDate.query.filter_by(
+                equipment_id=equipment.id, date=target_date, booking_id=None
+            ).first()
+            if blocked:
+                db.session.delete(blocked)
+                db.session.commit()
+                flash('Date unblocked.', 'success')
+            return redirect(url_for('manage_availability', equipment_id=equipment_id))
+
+    # Pre-populate form with current values
+    current_days = [d.strip() for d in (equipment.available_days or '0,1,2,3,4').split(',') if d.strip()]
+    form.available_days.data = current_days
+
+    manual_blocked = EquipmentBlockedDate.query.filter_by(
+        equipment_id=equipment.id, booking_id=None
+    ).order_by(EquipmentBlockedDate.date).all()
+
+    booking_blocked = EquipmentBlockedDate.query.filter(
+        EquipmentBlockedDate.equipment_id == equipment.id,
+        EquipmentBlockedDate.booking_id != None
+    ).order_by(EquipmentBlockedDate.date).all()
+
+    available_days = [int(d) for d in current_days if d]
+
+    return render_template(
+        'manage_availability.html',
+        equipment=equipment,
+        form=form,
+        remove_form=remove_form,
+        manual_blocked=manual_blocked,
+        booking_blocked=booking_blocked,
+        available_days_json=json.dumps(available_days),
+        booked_dates_json=json.dumps(get_booking_blocked_dates(equipment_id)),
+        manual_closed_json=json.dumps(get_manual_closed_dates(equipment_id)),
+    )
+
+
 # This part is needed to create the database file and tables from your models.
 # It runs only when you execute 'python app.py' directly.
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
+        # Add new columns to existing tables if they don't exist (SQLite migration)
+        inspector = inspect(db.engine)
+        with db.engine.connect() as conn:
+            equip_cols = [c['name'] for c in inspector.get_columns('equipment')]
+            if 'available_days' not in equip_cols:
+                conn.execute(text("ALTER TABLE equipment ADD COLUMN available_days VARCHAR(20) DEFAULT '0,1,2,3,4'"))
+                conn.commit()
+            if 'booking' in inspector.get_table_names():
+                booking_cols = [c['name'] for c in inspector.get_columns('booking')]
+                if 'start_date' not in booking_cols:
+                    conn.execute(text("ALTER TABLE booking ADD COLUMN start_date DATE"))
+                    conn.commit()
+                if 'end_date' not in booking_cols:
+                    conn.execute(text("ALTER TABLE booking ADD COLUMN end_date DATE"))
+                    conn.commit()
+                if 'selected_dates' not in booking_cols:
+                    conn.execute(text("ALTER TABLE booking ADD COLUMN selected_dates JSON"))
+                    conn.commit()
     app.run(debug=True)

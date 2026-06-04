@@ -51,10 +51,12 @@ class Equipment(db.Model):
     cost_remote = db.Column(db.Float)
     average_rating_cache = db.Column(db.Float, default=0)
     ratings_count_cache = db.Column(db.Integer, default=0)
+    available_days = db.Column(db.String(20), default='0,1,2,3,4')
 
     university_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     university = db.relationship('User', back_populates='equipment')
     reviews = db.relationship('Rating', back_populates='equipment', cascade='all, delete-orphan', lazy='dynamic')
+    blocked_dates = db.relationship('EquipmentBlockedDate', back_populates='equipment', cascade='all, delete-orphan', lazy='dynamic')
 
     def average_rating(self):
         return round(self.average_rating_cache or 0, 2)
@@ -117,7 +119,44 @@ class Booking(db.Model):
     final_cost = db.Column(db.Float)
     university_notes = db.Column(db.Text)
 
+    start_date = db.Column(db.Date, nullable=True)
+    end_date = db.Column(db.Date, nullable=True)
+    selected_dates = db.Column(db.JSON, nullable=True)  # list of 'YYYY-MM-DD' strings
+
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     renter = db.relationship('User', back_populates='bookings')
     equipment = db.relationship('Equipment', backref='bookings')
+
+
+class EquipmentBlockedDate(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    equipment_id = db.Column(db.Integer, db.ForeignKey('equipment.id'), nullable=False)
+    date = db.Column(db.Date, nullable=False)
+    # None = manually blocked (holiday/maintenance); set = auto-blocked by approved booking
+    booking_id = db.Column(db.Integer, db.ForeignKey('booking.id'), nullable=True)
+
+    equipment = db.relationship('Equipment', back_populates='blocked_dates')
+    booking = db.relationship('Booking', backref='blocked_dates')
+
+
+def get_blocked_dates(equipment_id):
+    rows = EquipmentBlockedDate.query.filter_by(equipment_id=equipment_id).all()
+    return sorted(set(r.date.strftime('%Y-%m-%d') for r in rows))
+
+
+def get_booking_blocked_dates(equipment_id):
+    """Dates blocked by approved bookings (shown as 'Booked' in red)."""
+    rows = EquipmentBlockedDate.query.filter(
+        EquipmentBlockedDate.equipment_id == equipment_id,
+        EquipmentBlockedDate.booking_id != None  # noqa: E711
+    ).all()
+    return sorted(set(r.date.strftime('%Y-%m-%d') for r in rows))
+
+
+def get_manual_closed_dates(equipment_id):
+    """Dates manually closed by university (shown as 'Closed' in grey)."""
+    rows = EquipmentBlockedDate.query.filter_by(
+        equipment_id=equipment_id, booking_id=None
+    ).all()
+    return sorted(set(r.date.strftime('%Y-%m-%d') for r in rows))

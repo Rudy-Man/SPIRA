@@ -10,94 +10,163 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <style>
         :root {
-            --primary-color: #4a47a3;
-            --secondary-color: #706fd3;
-            --accent-color: #34ace0;
-            --text-color: #f4f4f4;
-            --light-text-color: #f4f4f4;
-            --bg-color: #23272f;
-            --light-gray: #2c2f36;
-            --border-color: #444;
+            --primary-color:  #f0b429;
+            --secondary-color:#c890ff;
+            --accent-color:   #9f4ef0;
+            --text-color:     #f0ece0;
+            --light-text-color:#f0ece0;
+            --bg-color:       #07080b;
+            --light-gray:     #131420;
+            --border-color:   #1a1b28;
         }
-        body {
-            font-family: 'Poppins', Arial, sans-serif;
-            background: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Poppins', sans-serif; background: linear-gradient(160deg,#110820 0%,#07080b 35%,#07080b 65%,#0e0620 100%) fixed; color: var(--text-color); }
+
+        /* ── Header ── */
         .header-bar {
             display: flex; align-items: center; justify-content: space-between;
-            background: var(--bg-color); border-bottom: 2px solid var(--border-color); padding: 18px 32px;
+            background: rgba(7,8,11,0.88); backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 32px; height: 64px;
+            position: sticky; top: 0; z-index: 100;
         }
-        .logo { font-size: 1.6rem; font-weight: bold; color: var(--primary-color); display: flex; align-items: center; gap: 8px; }
-        .logo i { color: var(--accent-color); }
-        .logo .logo-anchor {
-            text-decoration: none;
-            color: inherit; /* Inherits from .logo */
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: color 0.2s ease-in-out;
+        .logo { font-size: 1.5rem; font-weight: 700; color: #f0b429; display: flex; align-items: center; gap: 10px; }
+        .logo i { color: var(--primary-color); -webkit-text-fill-color: var(--primary-color); }
+        .logo .logo-anchor { text-decoration: none; display: flex; align-items: center; gap: 8px; transition: opacity .2s; }
+        .logo .logo-anchor:hover { opacity: 0.8; }
+        .marketplace-link {
+            color: var(--text-color); font-weight: 600; font-size: 0.85rem;
+            margin-left: 24px; padding: 4px 12px;
+            background: var(--light-gray); border-radius: 999px;
+            border: 1px solid var(--border-color); text-decoration: none;
+            transition: border-color .2s, color .2s;
         }
-        .logo .logo-anchor:hover {
-            color: var(--secondary-color);
+        .marketplace-link:hover { border-color: var(--primary-color); color: var(--secondary-color); }
+
+        .search-bar-header {
+            display: flex; align-items: center;
+            background: var(--light-gray); border: 1px solid var(--border-color);
+            border-radius: 999px; padding: 4px 14px; gap: 6px;
+            transition: border-color .2s;
         }
-        .marketplace-link { color: var(--primary-color); font-weight: 600; margin-left: 18px; text-decoration: underline; }
-        .search-bar-header { display: flex; align-items: center; background: var(--light-gray); border-radius: 20px; padding: 4px 12px; }
-        .search-bar-header input { border: none; background: transparent; outline: none; font-size: 1rem; padding: 6px 8px; color: var(--text-color); }
-        .profile-icon { font-size: 1.7rem; color: var(--primary-color); margin-left: 18px; }
-        .main-flex { display: flex; max-width: 1300px; margin: 32px auto; background: var(--light-gray); border-radius: 10px; box-shadow: 0 2px 12px var(--border-color); }
-        .sidebar { width: 230px; background: var(--light-gray); border-right: 2px solid var(--border-color); padding: 24px 0 24px 24px; }
-        .filter-btn { display: block; width: 90%; background: var(--bg-color); color: var(--primary-color); border: 2px solid var(--primary-color); border-radius: 6px; font-weight: 700; padding: 8px 0; margin-bottom: 12px; cursor: pointer; margin-left: 0; transition: all 0.3s; }
-        .filter-btn:hover { background: var(--light-gray); color: var(--secondary-color); border-color: var(--secondary-color); }
-        .filter-section { margin-bottom: 18px; }
-        .filter-label { font-weight: 600; color: var(--primary-color); margin-bottom: 6px; display: block; }
-        .filter-select, .filter-range { width: 90%; padding: 6px; border-radius: 4px; border: 1px solid var(--border-color); margin-bottom: 6px; background: var(--bg-color); color: var(--text-color); }
-        .main-content { flex: 1; padding: 32px 40px; }
-        .marketplace-title-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
-        .marketplace-title { font-size: 2rem; font-weight: 700; color: var(--primary-color); letter-spacing: 1px; }
-        .sort-by { font-size: 1rem; color: var(--primary-color); }
-        .sort-by select { padding: 4px 10px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-color); }
-        .search-bar-main { display: flex; align-items: center; margin-bottom: 24px; }
-        .search-bar-main input { width: 320px; padding: 8px 14px; border-radius: 20px; border: 1.5px solid var(--border-color); font-size: 1rem; margin-right: 8px; background: var(--bg-color); color: var(--text-color); }
-        .search-bar-main button { background: var(--primary-color); color: var(--light-text-color); border: none; border-radius: 20px; padding: 8px 18px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
-        .search-bar-main button:hover { background: var(--secondary-color); color: var(--light-text-color); }
-        .btn { display: inline-block; padding: 10px 25px; border-radius: 50px; text-align: center; font-weight: 600; transition: all 0.3s; cursor: pointer; border: 2px solid transparent; font-size: 0.9rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .btn-secondary { background-color: var(--bg-color); color: var(--primary-color); border: 2px solid var(--primary-color); }
-        .btn-secondary:hover { background-color: var(--light-gray); color: var(--secondary-color); border-color: var(--secondary-color); transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        .equipment-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
-        .equip-card { background: var(--bg-color); border: 2px solid var(--border-color); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; align-items: flex-start; }
-        .equip-image { width: 100%; height: 110px; background: var(--light-gray); border-radius: 6px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; color: var(--secondary-color); font-size: 2.2rem; }
-        .equip-title { font-size: 1.1rem; font-weight: 600; color: var(--primary-color); margin-bottom: 2px; }
-        .equip-university { font-size: 0.97rem; color: var(--secondary-color); margin-bottom: 4px; }
-        .equip-rating { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-        .star-display { position: relative; display: inline-block; font-size: 1.1rem; line-height: 1; color: #4b4b4b; }
-        .star-display .star-row { display: block; white-space: nowrap; color: #555; }
-        .star-display .star-row.front { position: absolute; left: 0; top: 0; overflow: hidden; color: #f7b731; }
-        .rating-number { font-weight: 600; color: var(--light-text-color); }
-        .rating-count { font-size: 0.9rem; color: #b5b8d6; }
-        .rating-count.no-ratings { font-style: italic; color: #9aa0c5; font-weight: 500; }
+        .search-bar-header:focus-within { border-color: var(--primary-color); }
+        .search-bar-header input { border: none; background: transparent; outline: none; font-size: 0.9rem; padding: 5px 4px; color: var(--text-color); font-family: inherit; width: 200px; }
+        .search-bar-header input::placeholder { color: #4b556e; }
+        .search-bar-header i { color: #4b556e; font-size: 0.9rem; }
+
+        /* ── Layout ── */
+        .main-flex {
+            display: flex; max-width: 1340px; margin: 28px auto 48px;
+            background: var(--light-gray); border-radius: 14px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.45);
+        }
+        .sidebar {
+            width: 250px; flex-shrink: 0;
+            background: #0d0e14; border-right: 1px solid var(--border-color);
+            padding: 28px 20px; border-radius: 14px 0 0 14px;
+        }
+        .filter-section { margin-bottom: 22px; }
+        .filter-label { font-weight: 700; color: var(--secondary-color); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block; }
+        .filter-select {
+            width: 100%; padding: 8px 10px; border-radius: 8px;
+            border: 1px solid var(--border-color); background: var(--bg-color);
+            color: var(--text-color); font-family: inherit; font-size: 0.9rem;
+            outline: none; transition: border-color .2s;
+        }
+        .filter-select:focus { border-color: var(--primary-color); }
+        .filter-range { width: 100%; accent-color: var(--primary-color); margin-bottom: 6px; cursor: pointer; }
+        .filter-btn {
+            display: block; width: 100%;
+            background: #f0b429;
+            color: #07080b; border: none; border-radius: 8px; font-weight: 700;
+            padding: 10px 0; margin-bottom: 10px; cursor: pointer;
+            font-family: inherit; font-size: 0.9rem;
+            transition: opacity .2s, transform .2s;
+        }
+        .filter-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+        .reset-btn { background: transparent !important; color: var(--primary-color) !important; border: 1px solid var(--primary-color) !important; }
+        .reset-btn:hover { background: rgba(240,180,41,0.08) !important; }
+
+        /* ── Main content ── */
+        .main-content { flex: 1; padding: 32px 36px; min-width: 0; }
+        .marketplace-title-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+        .marketplace-title { font-size: 1.6rem; font-weight: 700; color: var(--text-color); letter-spacing: -0.3px; }
+        .sort-by { font-size: 0.88rem; color: #8888a0; display: flex; align-items: center; gap: 8px; }
+        .sort-by select { padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-color); font-family: inherit; outline: none; }
+
+        .search-bar-main { display: flex; align-items: center; margin-bottom: 28px; gap: 10px; }
+        .search-bar-main input {
+            flex: 1; max-width: 400px; padding: 10px 16px;
+            border-radius: 999px; border: 1px solid var(--border-color);
+            background: var(--bg-color); color: var(--text-color);
+            font-family: inherit; font-size: 0.95rem; outline: none;
+            transition: border-color .2s;
+        }
+        .search-bar-main input:focus { border-color: var(--primary-color); }
+        .search-bar-main button {
+            background: #f0b429;
+            color: #07080b; border: none; border-radius: 999px; padding: 10px 22px;
+            font-weight: 600; cursor: pointer; font-family: inherit; font-size: 0.9rem;
+            transition: opacity .2s;
+        }
+        .search-bar-main button:hover { opacity: 0.85; }
+
+        /* ── Equipment grid ── */
+        .equipment-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+        .equip-card {
+            background: #0d0e14; border: 1px solid var(--border-color);
+            border-radius: 12px; overflow: hidden;
+            display: flex; flex-direction: column;
+            transition: transform .25s, border-color .25s, box-shadow .25s;
+        }
+        .equip-card:hover { transform: translateY(-4px); border-color: var(--primary-color); box-shadow: 0 0 28px rgba(240,180,41,0.18); }
+        .equip-image {
+            width: 100%; height: 130px;
+            background: var(--light-gray); border-radius: 0;
+            display: flex; align-items: center; justify-content: center;
+            color: #38384e; font-size: 2.5rem; overflow: hidden;
+        }
+        .equip-image img { width: 100%; height: 100%; object-fit: cover; }
+        .equip-card-body { padding: 14px 16px 16px; flex: 1; display: flex; flex-direction: column; gap: 3px; }
+        .equip-title { font-size: 1rem; font-weight: 700; color: var(--text-color); line-height: 1.3; }
+        .equip-university { font-size: 0.82rem; color: #8888a0; display: flex; align-items: center; gap: 5px; }
+        .equip-rating { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+        .star-display { position: relative; display: inline-block; font-size: 1rem; line-height: 1; }
+        .star-display .star-row { display: block; white-space: nowrap; color: #252636; }
+        .star-display .star-row.front { position: absolute; left: 0; top: 0; overflow: hidden; color: #f0b429; }
+        .rating-number { font-weight: 700; color: var(--text-color); font-size: 0.88rem; }
+        .rating-count { font-size: 0.82rem; color: #8888a0; }
+        .rating-count.no-ratings { font-style: italic; color: #38384e; }
         .rating-filter-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-        .rating-filter-header .rating-clear-btn { background: none; border: none; color: var(--accent-color); font-weight: 600; cursor: pointer; padding: 0; font-size: 0.85rem; }
-        .rating-filter-header .rating-clear-btn:hover { color: var(--secondary-color); }
-        .filter-rating { display: inline-flex; align-items: center; gap: 6px; margin: 6px 0 10px 0; }
+        .rating-filter-header .rating-clear-btn { background: none; border: none; color: var(--primary-color); font-weight: 600; cursor: pointer; padding: 0; font-size: 0.82rem; font-family: inherit; }
+        .rating-filter-header .rating-clear-btn:hover { color: var(--yellow-light, #fce068); }
+        .filter-rating { display: inline-flex; align-items: center; gap: 4px; margin: 6px 0 10px; }
         .filter-rating input[type="radio"] { display: none; }
-        .filter-star-label { font-size: 24px; color: #3d3f48; cursor: pointer; transition: color 0.2s ease; user-select: none; }
-        .filter-star-label.active { color: #f7b731; }
-        .filter-star-label:hover, .filter-star-label:focus { color: #f7b731; }
-        .reset-btn { margin-top: 8px; background: transparent; color: var(--accent-color); border-color: var(--accent-color); }
-        .reset-btn:hover { background: var(--accent-color); color: var(--bg-color); }
-        .equip-view-btn { background: var(--bg-color); color: var(--primary-color); border: 1.5px solid var(--primary-color); border-radius: 4px; padding: 5px 16px; font-size: 0.95rem; font-weight: 600; cursor: pointer; margin-top: 6px; transition: background 0.2s, color 0.2s; text-decoration: none; text-align: center; }
-        .equip-view-btn:hover { background: var(--light-gray); color: var(--secondary-color); border-color: var(--secondary-color); }
-        @media (max-width: 1100px) { .main-flex { flex-direction: column; } .sidebar { width: 100%; border-right: none; border-bottom: 2px solid var(--border-color); padding: 18px 0 0 0; } .main-content { padding: 24px 10px; } .equipment-grid { grid-template-columns: 1fr 1fr; } }
-        @media (max-width: 700px) { .main-flex { flex-direction: column; } .sidebar { width: 100%; border-right: none; border-bottom: 2px solid var(--border-color); padding: 12px 0 0 0; } .main-content { padding: 12px 2px; } .equipment-grid { grid-template-columns: 1fr; } }
-        .marketplace-container {
-            max-width: 90%;
-            margin: 20px auto;
-            padding: 20px 10px;
-            background-color: var(--bg-color);
-            border-radius: 8px;
-            box-shadow: var(--shadow);
+        .filter-star-label { font-size: 22px; color: #252636; cursor: pointer; transition: color .2s; user-select: none; }
+        .filter-star-label.active { color: #f0b429; }
+        .filter-star-label:hover { color: #f0b429; }
+        .equip-view-btn {
+            display: block; margin-top: auto; padding: 8px 0; text-align: center;
+            background: var(--bg-color); border: 1px solid var(--border-color);
+            border-radius: 8px; color: var(--primary-color); font-size: 0.88rem; font-weight: 600;
+            text-decoration: none; transition: background .2s, border-color .2s, color .2s;
+        }
+        .equip-view-btn:hover { background: #9e7a10; border-color: #9e7a10; color: #07080b; }
+
+        .btn { display: inline-flex; align-items: center; justify-content: center; padding: 9px 22px; border-radius: 999px; font-family: inherit; font-weight: 600; transition: all .25s; cursor: pointer; border: 1px solid transparent; font-size: 0.88rem; text-decoration: none; }
+        .btn-secondary { background: transparent; color: var(--primary-color); border-color: var(--border-color); }
+        .btn-secondary:hover { background: var(--light-gray); border-color: var(--primary-color); color: var(--primary-color); transform: translateY(-1px); }
+
+        @media (max-width: 1100px) {
+            .main-flex { flex-direction: column; margin: 16px; }
+            .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border-color); border-radius: 14px 14px 0 0; padding: 20px; }
+            .equipment-grid { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 700px) {
+            .main-content { padding: 20px 16px; }
+            .equipment-grid { grid-template-columns: 1fr; }
+            .header-bar { padding: 0 16px; }
         }
     </style>
 </head>
@@ -114,7 +183,11 @@
             <input type="text" placeholder="Search...">
             <i class="fas fa-search"></i>
         </div>
-        <i class="fas fa-user-circle profile-icon"></i> 
+        {% if current_user.is_authenticated %}
+        <button onclick="openProfilePanel()" title="{{ current_user.username }}" style="background:none;border:none;cursor:pointer;color:#f0b429;font-size:1.6rem;display:flex;align-items:center;padding:0 4px;">
+            <i class="fas fa-user-circle"></i>
+        </button>
+        {% endif %}
         {% if current_user.is_authenticated and current_user.is_university %}
             <a href="{{ url_for('register_equipment') }}" class="btn btn-secondary" style="font-size: 1rem; padding: 8px 18px; margin-left: 18px;">List Your Equipment</a>
         {% endif %}
@@ -145,13 +218,13 @@
                 <div class="filter-section">
                     <label class="filter-label" for="max_cost_onsite">Max On-site Cost (/hr)</label>
                     <input class="filter-range" id="cost-onsite-range" name="max_cost_onsite" type="range" min="0" max="{{ slider_max_onsite }}" value="{{ selected_max_cost_onsite }}" step="50">
-                    <span id="cost-onsite-value" style="font-size:0.98em; color:#4a47a3; font-weight:600; margin-left:8px;"></span>
+                    <span id="cost-onsite-value" style="font-size:0.98em; color:#f0b429; font-weight:600; margin-left:8px;"></span>
                     <input class="filter-select" id="cost-onsite-text" type="number" placeholder="e.g., 500" style="width: 90%; margin-top: 10px;">
                 </div>
                 <div class="filter-section">
                     <label class="filter-label" for="max_cost_remote">Max Remote Cost (/hr)</label>
                     <input class="filter-range" id="cost-remote-range" name="max_cost_remote" type="range" min="0" max="{{ slider_max_remote }}" value="{{ selected_max_cost_remote }}" step="50">
-                    <span id="cost-remote-value" style="font-size:0.98em; color:#4a47a3; font-weight:600; margin-left:8px;"></span>
+                    <span id="cost-remote-value" style="font-size:0.98em; color:#f0b429; font-weight:600; margin-left:8px;"></span>
                     <input class="filter-select" id="cost-remote-text" type="number" placeholder="e.g., 500" style="width: 90%; margin-top: 10px;">
                 </div>
                 <div class="filter-section">
@@ -185,29 +258,31 @@
                     <div class="equip-card">
                         <div class="equip-image">
                             {% if equipment.primary_image_filename %}
-                                <img src="{{ url_for('static', filename='uploads/' + equipment.primary_image_filename) }}" alt="{{ equipment.name }}" style="width:100%; height:100%; object-fit: cover;">
-                            {% else %} 
+                                <img src="{{ url_for('static', filename='uploads/' + equipment.primary_image_filename) }}" alt="{{ equipment.name }}">
+                            {% else %}
                                 <i class="fas fa-flask"></i>
                             {% endif %}
                         </div>
-                         <div class="equip-title">{{ equipment.name }}</div>
-                        <div class="equip-university">{{ equipment.university.username }}</div>
-                        <div class="equip-rating">
-                            <div class="star-display" aria-label="{% if equipment.ratings_count_display %}{{ '%.1f' % equipment.average_rating }} out of 5 stars{% else %}No ratings yet{% endif %}">
-                                <div class="star-row back">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-                                <div class="star-row front" style="width: {{ '%.2f' % equipment.star_width }}%">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                        <div class="equip-card-body">
+                            <div class="equip-title">{{ equipment.name }}</div>
+                            <div class="equip-university"><i class="fas fa-university"></i> {{ equipment.university.username }}</div>
+                            <div class="equip-rating">
+                                <div class="star-display" aria-label="{% if equipment.ratings_count_display %}{{ '%.1f' % equipment.average_rating }} out of 5 stars{% else %}No ratings yet{% endif %}">
+                                    <div class="star-row back">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                                    <div class="star-row front" style="width: {{ '%.2f' % equipment.star_width }}%">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                                </div>
+                                {% if equipment.ratings_count_display %}
+                                    <span class="rating-number">{{ '%.1f' % equipment.average_rating }}</span>
+                                    <span class="rating-count">({{ equipment.ratings_count_display }})</span>
+                                {% else %}
+                                    <span class="rating-count no-ratings">No ratings yet</span>
+                                {% endif %}
                             </div>
-                            {% if equipment.ratings_count_display %}
-                                <span class="rating-number">{{ '%.1f' % equipment.average_rating }}</span>
-                                <span class="rating-count">({{ equipment.ratings_count_display }})</span>
-                            {% else %}
-                                <span class="rating-count no-ratings">No ratings yet</span>
-                            {% endif %}
+                            <a href="{{ url_for('equipment_info', equipment_id=equipment.id) }}" class="equip-view-btn">View Details</a>
                         </div>
-                        <a href="{{ url_for('equipment_info', equipment_id=equipment.id) }}" class="equip-view-btn">View More</a>
                     </div>
                 {% else %}
-                    <p style="color: #ccc;">No equipment found matching your criteria.</p>
+                    <p style="color:#4b556e; grid-column:span 3; padding:40px 0; text-align:center;">No equipment found matching your criteria.</p>
                 {% endfor %}
             </div>
         </main>
@@ -321,5 +396,6 @@
         }
     });
     </script>
+    {% include '_profile_panel.html' %}
 </body>
 </html>

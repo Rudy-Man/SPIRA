@@ -1,0 +1,356 @@
+{% if current_user.is_authenticated %}
+<style>
+    .profile-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.55);
+        z-index: 9998;
+        transition: opacity .25s;
+    }
+    .profile-overlay.open { display: block; }
+
+    .profile-panel {
+        position: fixed;
+        top: 0; right: 0;
+        width: 320px;
+        height: 100vh;
+        background: #0a0b0f;
+        border-left: 1px solid #1a1b28;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        padding: 0;
+        transform: translateX(100%);
+        transition: transform .3s cubic-bezier(.4,0,.2,1);
+        box-shadow: -6px 0 32px rgba(0,0,0,0.45);
+        font-family: 'Poppins', sans-serif;
+    }
+    .profile-panel.open { transform: translateX(0); }
+
+    .profile-panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 20px 14px;
+        border-bottom: 1px solid #1a1b28;
+    }
+    .profile-panel-title {
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        color: #f0b429;
+    }
+    .profile-panel-close {
+        background: none;
+        border: none;
+        color: #888;
+        font-size: 1.4rem;
+        cursor: pointer;
+        line-height: 1;
+        padding: 0 4px;
+        transition: color .2s;
+    }
+    .profile-panel-close:hover { color: #f4f4f4; }
+
+    .profile-panel-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+        scrollbar-width: thin;
+        scrollbar-color: #252636 transparent;
+    }
+
+    .pp-avatar-row {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 20px;
+    }
+    .pp-avatar {
+        width: 52px; height: 52px;
+        border-radius: 50%;
+        background: #f0b429;
+        color: #07080b;
+        font-size: 1.4rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        text-transform: uppercase;
+    }
+    .pp-name { font-size: 1.05rem; font-weight: 700; color: #f4f4f4; line-height: 1.3; }
+    .pp-email { font-size: 0.78rem; color: #888; margin-top: 2px; word-break: break-all; }
+    .pp-badge {
+        display: inline-block;
+        font-size: 0.68rem;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 999px;
+        margin-top: 4px;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+    }
+    .pp-badge-uni  { background: rgba(159,78,240,0.15); color: #c890ff; border: 1px solid rgba(159,78,240,0.3); }
+    .pp-badge-user { background: rgba(240,180,41,0.12); color: #f0b429; border: 1px solid rgba(240,180,41,0.3); }
+
+    .pp-section-title {
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #38384e;
+        margin: 18px 0 10px;
+    }
+
+    .pp-stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 4px;
+    }
+    .pp-stat {
+        background: #0d0e14;
+        border: 1px solid #1a1b28;
+        border-radius: 8px;
+        padding: 12px 10px;
+        text-align: center;
+    }
+    .pp-stat-num {
+        font-size: 1.55rem;
+        font-weight: 700;
+        color: #f0b429;
+        line-height: 1;
+    }
+    .pp-stat-label {
+        font-size: 0.7rem;
+        color: #8888a0;
+        margin-top: 4px;
+        line-height: 1.3;
+    }
+
+    .pp-recent-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 9px 0;
+        border-bottom: 1px solid #0d0e14;
+    }
+    .pp-recent-item:last-child { border-bottom: none; }
+    .pp-recent-icon {
+        color: #9e7a10;
+        font-size: 0.85rem;
+        margin-top: 2px;
+        flex-shrink: 0;
+    }
+    .pp-recent-name {
+        font-size: 0.85rem;
+        color: #f0ece0;
+        font-weight: 500;
+        line-height: 1.3;
+    }
+    .pp-recent-sub {
+        font-size: 0.73rem;
+        color: #8888a0;
+        margin-top: 1px;
+    }
+    .pp-status-chip {
+        display: inline-block;
+        font-size: 0.65rem;
+        font-weight: 700;
+        padding: 1px 7px;
+        border-radius: 999px;
+        margin-top: 3px;
+        text-transform: uppercase;
+        letter-spacing: .3px;
+    }
+    .pp-chip-pending  { background: rgba(251,191,36,0.12); color: #fbbf24; border: 1px solid rgba(251,191,36,0.3); }
+    .pp-chip-approved { background: rgba(74,222,128,0.1); color: #4ade80; border: 1px solid rgba(74,222,128,0.3); }
+    .pp-chip-rejected { background: rgba(248,113,113,0.1); color: #f87171; border: 1px solid rgba(248,113,113,0.3); }
+
+    .pp-empty {
+        font-size: 0.82rem;
+        color: #38384e;
+        text-align: center;
+        padding: 12px 0;
+    }
+
+    .profile-panel-footer {
+        padding: 16px 20px;
+        border-top: 1px solid #1a1b28;
+    }
+    .pp-signout {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        padding: 11px 0;
+        border-radius: 8px;
+        background: rgba(248,113,113,0.08);
+        border: 1px solid rgba(248,113,113,0.25);
+        color: #f87171;
+        font-size: 0.95rem;
+        font-weight: 700;
+        text-decoration: none;
+        transition: background .2s, border-color .2s;
+        font-family: 'Poppins', sans-serif;
+    }
+    .pp-signout:hover { background: rgba(248,113,113,0.16); border-color: rgba(248,113,113,0.5); color: #f87171; }
+
+    /* Trigger button — shown on pages without their own profile icon in the nav */
+    .profile-fab {
+        position: fixed;
+        top: 14px; right: 18px;
+        z-index: 9000;
+        width: 40px; height: 40px;
+        border-radius: 50%;
+        background: #f0b429;
+        border: none;
+        color: #07080b;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.4);
+        display: none; /* shown only where no other trigger exists */
+        align-items: center;
+        justify-content: center;
+        text-transform: uppercase;
+        transition: transform .2s, box-shadow .2s;
+    }
+    .profile-fab:hover { transform: scale(1.08); box-shadow: 0 5px 16px rgba(0,0,0,0.5); }
+    .profile-fab.fab-visible { display: flex; }
+</style>
+
+<!-- Profile overlay -->
+<div id="profileOverlay" class="profile-overlay" onclick="closeProfilePanel()"></div>
+
+<!-- Profile slide panel -->
+<div id="profilePanel" class="profile-panel">
+    <div class="profile-panel-header">
+        <span class="profile-panel-title">My Profile</span>
+        <button class="profile-panel-close" onclick="closeProfilePanel()">&#10005;</button>
+    </div>
+
+    <div class="profile-panel-body">
+        <!-- Avatar + identity -->
+        <div class="pp-avatar-row">
+            <div class="pp-avatar">{{ current_user.username[0] }}</div>
+            <div>
+                <div class="pp-name">{{ current_user.username }}</div>
+                <div class="pp-email">{{ current_user.email }}</div>
+                {% if current_user.is_university %}
+                    <span class="pp-badge pp-badge-uni"><i class="fas fa-university"></i> University</span>
+                {% else %}
+                    <span class="pp-badge pp-badge-user"><i class="fas fa-user"></i> User</span>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if profile_data is defined %}
+
+        <!-- Stats -->
+        <div class="pp-section-title">Overview</div>
+        <div class="pp-stats">
+            {% if current_user.is_university %}
+            <div class="pp-stat">
+                <div class="pp-stat-num">{{ profile_data.equipment_count }}</div>
+                <div class="pp-stat-label">Equipment Listed</div>
+            </div>
+            <div class="pp-stat">
+                <div class="pp-stat-num">{{ profile_data.total_bookings }}</div>
+                <div class="pp-stat-label">Bookings Received</div>
+            </div>
+            <div class="pp-stat" style="grid-column: span 2;">
+                <div class="pp-stat-num">{{ profile_data.approved_bookings }}</div>
+                <div class="pp-stat-label">Approved Bookings</div>
+            </div>
+            {% else %}
+            <div class="pp-stat">
+                <div class="pp-stat-num">{{ profile_data.total_requests }}</div>
+                <div class="pp-stat-label">Requests Sent</div>
+            </div>
+            <div class="pp-stat">
+                <div class="pp-stat-num">{{ profile_data.approved_requests }}</div>
+                <div class="pp-stat-label">Approved</div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Recent activity -->
+        <div class="pp-section-title">
+            {% if current_user.is_university %}Recent Booking Requests{% else %}Recent Requests{% endif %}
+        </div>
+
+        {% if current_user.is_university %}
+            {% if profile_data.recent_bookings %}
+                {% for b in profile_data.recent_bookings %}
+                <div class="pp-recent-item">
+                    <i class="fas fa-calendar-check pp-recent-icon"></i>
+                    <div>
+                        <div class="pp-recent-name">{{ b.equipment.name }}</div>
+                        <div class="pp-recent-sub">by {{ b.renter.username }}</div>
+                        {% if b.status == 'Approved' %}
+                            <span class="pp-status-chip pp-chip-approved">{{ b.status }}</span>
+                        {% elif b.status == 'Rejected' %}
+                            <span class="pp-status-chip pp-chip-rejected">{{ b.status }}</span>
+                        {% else %}
+                            <span class="pp-status-chip pp-chip-pending">Pending</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="pp-empty">No booking requests yet.</div>
+            {% endif %}
+        {% else %}
+            {% if profile_data.recent_requests %}
+                {% for b in profile_data.recent_requests %}
+                <div class="pp-recent-item">
+                    <i class="fas fa-flask pp-recent-icon"></i>
+                    <div>
+                        <div class="pp-recent-name">{{ b.equipment.name }}</div>
+                        <div class="pp-recent-sub">{{ b.equipment.university.username }}</div>
+                        {% if b.status == 'Approved' %}
+                            <span class="pp-status-chip pp-chip-approved">{{ b.status }}</span>
+                        {% elif b.status == 'Rejected' %}
+                            <span class="pp-status-chip pp-chip-rejected">{{ b.status }}</span>
+                        {% else %}
+                            <span class="pp-status-chip pp-chip-pending">Pending</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="pp-empty">No requests sent yet.</div>
+            {% endif %}
+        {% endif %}
+
+        {% endif %}{# end profile_data defined #}
+    </div>
+
+    <div class="profile-panel-footer">
+        <a href="{{ url_for('logout') }}" class="pp-signout">
+            <i class="fas fa-sign-out-alt"></i> Sign Out
+        </a>
+    </div>
+</div>
+
+<script>
+    function openProfilePanel() {
+        document.getElementById('profilePanel').classList.add('open');
+        document.getElementById('profileOverlay').classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeProfilePanel() {
+        document.getElementById('profilePanel').classList.remove('open');
+        document.getElementById('profileOverlay').classList.remove('open');
+        document.body.style.overflow = '';
+    }
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeProfilePanel();
+    });
+</script>
+{% endif %}

@@ -1,40 +1,81 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container" style="max-width: 800px; margin: 40px auto; background: #fff; border-radius: 10px; padding: 2rem; color: #333;">
-    
-    <h2 style="color: #4a47a3; text-align: center;">Request to Use: {{ equipment.name }}</h2>
-    <p style="text-align: center; color: #555; margin-bottom: 2rem;">
-        Please provide the following details for your experiment. The university will review your request and get back to you.
+<div class="container" style="max-width: 860px; margin: 40px auto; background: #0d0e14; border: 1px solid #1a1b28; border-radius: 14px; padding: 2rem; color: #f0ece0;">
+
+    <h2 style="color:#f0b429; text-align: center;">Request to Use: {{ equipment.name }}</h2>
+    <p style="text-align: center; color: #8888a0; margin-bottom: 2rem;">
+        Click the dates you need on the calendar, then describe your experiment below.
     </p>
 
-    <form action="" method="post" novalidate>
-        {{ form.hidden_tag() }}
+    <form action="" method="post" novalidate id="request-form">
+        {{ form.csrf_token }}
+        {{ form.selected_dates(id="selected-dates-input") }}
+
+        <!-- Date Picker -->
+        <div style="margin-bottom: 2rem; border: 1px solid #1a1b28; border-radius: 10px; padding: 1.2rem; background:#131420;">
+            <h3 style="color: #f0b429; margin: 0 0 12px 0; font-size: 1.05rem;">Select Your Dates</h3>
+            <p style="font-size: 0.85rem; color: #8888a0; margin: 0 0 10px;">
+                Green = available &nbsp;|&nbsp; Grey = closed &nbsp;|&nbsp; Red = already booked
+            </p>
+            <div id="request-calendar"></div>
+            <p id="date-required-error" style="color:#e74c3c; font-size:0.9rem; display:none; margin-top:6px;">
+                Please select at least one date before submitting.
+            </p>
+        </div>
 
         <div class="form-group" style="margin-bottom: 1.5rem;">
-            {{ form.experiment_description.label(style="font-weight: 600; color: #4a47a3; margin-bottom: 0.5rem; display: block;") }}
-            {{ form.experiment_description(class="form-control", style="width: 100%; min-height: 150px; border: 1px solid #ccc; border-radius: 6px; padding: 10px; font-size: 1rem;") }}
+            {{ form.experiment_description.label(style="font-weight: 600; color: #f0b429; margin-bottom: 0.5rem; display: block;") }}
+            {{ form.experiment_description(class="form-control", style="width: 100%; min-height: 150px; border: 1px solid #1a1b28; border-radius: 8px; padding: 10px; font-size: 1rem; background:#131420; color:#f0ece0; font-family:inherit;") }}
             {% for error in form.experiment_description.errors %}
                 <span style="color: #e74c3c; font-size: 0.9rem;">[{{ error }}]</span>
             {% endfor %}
         </div>
 
         <div class="form-group" style="margin-bottom: 1.5rem;">
-            {{ form.samples_list.label(style="font-weight: 600; color: #4a47a3; margin-bottom: 0.5rem; display: block;") }}
-            {{ form.samples_list(class="form-control", style="width: 100%; min-height: 100px; border: 1px solid #ccc; border-radius: 6px; padding: 10px; font-size: 1rem;") }}
-            {% for error in form.samples_list.errors %}
-                <span style="color: #e74c3c; font-size: 0.9rem;">[{{ error }}]</span>
-            {% endfor %}
+            {{ form.samples_list.label(style="font-weight: 600; color: #f0b429; margin-bottom: 0.5rem; display: block;") }}
+            {{ form.samples_list(class="form-control", style="width: 100%; min-height: 100px; border: 1px solid #1a1b28; border-radius: 8px; padding: 10px; font-size: 1rem; background:#131420; color:#f0ece0; font-family:inherit;") }}
         </div>
 
         <div style="text-align: center; margin-top: 2rem;">
-            {{ form.submit(class="btn btn-primary", style="background: #4a47a3; color: white; border: none; border-radius: 4px; padding: 12px 35px; font-weight: 700; font-size: 1.1rem; cursor: pointer;") }}
+            {{ form.submit(class="btn btn-primary", style="background:#f0b429; color:#07080b; border:none; border-radius:8px; padding:12px 35px; font-weight:700; font-size:1rem; cursor:pointer;") }}
         </div>
     </form>
 
     <div style="text-align: center; margin-top: 20px;">
-        <a href="{{ url_for('equipment_info', equipment_id=equipment.id) }}" style="color: #777; text-decoration: none;">← Cancel and go back</a>
+        <a href="{{ url_for('equipment_info', equipment_id=equipment.id) }}" style="color: #8888a0; text-decoration: none;">← Cancel and go back</a>
     </div>
-
 </div>
+
+<script src="{{ url_for('static', filename='js/availability_calendar.js') }}"></script>
+<script>
+    const availableDays  = {{ available_days_json | safe }};
+    const bookedDates    = {{ booked_dates_json | safe }};
+    const manualClosed   = {{ manual_closed_json | safe }};
+    const hiddenInput    = document.getElementById('selected-dates-input');
+
+    document.addEventListener('DOMContentLoaded', function () {
+        renderCalendar(
+            'request-calendar',
+            availableDays,
+            bookedDates,
+            manualClosed,
+            'multiselect',
+            function (selectedArray) {
+                hiddenInput.value = JSON.stringify(selectedArray);
+                document.getElementById('date-required-error').style.display = 'none';
+            }
+        );
+
+        document.getElementById('request-form').addEventListener('submit', function (e) {
+            const val = hiddenInput.value;
+            let isEmpty = true;
+            try { isEmpty = JSON.parse(val).length === 0; } catch (_) {}
+            if (isEmpty) {
+                e.preventDefault();
+                document.getElementById('date-required-error').style.display = 'block';
+            }
+        });
+    });
+</script>
 {% endblock %}

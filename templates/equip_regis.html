@@ -3,16 +3,16 @@
 {% block head_content %}
     <style>
         :root {
-            --primary-color: #4a47a3;
-            --secondary-color: #706fd3;
-            --accent-color: #34ace0;
-            --text-color: #23272f; /* Using dark text for white background sections */
-            --bg-color: #23272f; /* Dark background for body */
-            --light-gray: #2c2f36; /* Darker grey for some elements */
-            --white: #fff;
-            --border-color: #444; /* Dark border for dark theme */
-            --section-bg: #fff; /* White background for main content sections */
-            --section-border: #e6e8fa; /* Light border for white theme sections */
+            --primary-color:  #f0b429;
+            --secondary-color:#c890ff;
+            --accent-color:   #9f4ef0;
+            --text-color:     #f0ece0;
+            --bg-color:       #07080b;
+            --light-gray:     #131420;
+            --white:          #0d0e14;
+            --border-color:   #1a1b28;
+            --section-bg:     #0d0e14;
+            --section-border: #1a1b28;
         }
         /* Body styles are inherited from base.html, but these are for the specific container */
         .container.multi-step-form {
@@ -185,8 +185,7 @@
             text-align: center;
         }
         .submit-btn:hover, .finish-btn:hover {
-            background: #34ace0;
-            opacity: 0.9;
+            opacity: 0.85;
         }
 
         /* Back to Marketplace button styling */
@@ -227,6 +226,7 @@
         <button class="step-btn" data-step="2">Step 2</button>
         <button class="step-btn" data-step="3">Step 3</button>
         <button class="step-btn" data-step="4">Step 4</button>
+        <button class="step-btn" data-step="5">Step 5</button>
         <a href="{{ url_for('market') }}" class="back-to-market-btn">Back to Marketplace</a>
     </div>
     <div class="main-step-content" id="step-content">
@@ -251,7 +251,7 @@
                     <div class="upload-area small" data-target-id="{{ form.primary_image.id }}">
                         <i class="fas fa-cloud-upload-alt"></i>
                         <span>Click to upload</span>
-                        {{ form.primary_image(class="hidden-file-input") }}
+                        {{ form.primary_image(class="hidden-file-input", accept="image/*") }}
                     </div>
                     {% for error in form.primary_image.errors %}<span class="error">[{{ error }}]</span>{% endfor %}
                 </div>
@@ -281,22 +281,22 @@
                     <div class="upload-area" data-target-id="{{ form.secondary_images.id }}">
                         <i class="fas fa-images"></i>
                         <span>Click to upload (max 4)</span>
-                        {{ form.secondary_images(class="hidden-file-input", multiple=True) }}
+                        {{ form.secondary_images(class="hidden-file-input", multiple=True, accept="image/*") }}
                     </div>
                     {% for error in form.secondary_images.errors %}<span class="error">[{{ error }}]</span>{% endfor %}
                 </div>
                 <div class="form-group">
                     <label>Upload Documents</label>
                     <button type="button" class="file-upload-btn" data-target-id="{{ form.tech_specs_pdf.id }}" data-original-text="Upload Technical Specs">Upload Technical Specs</button>
-                    {{ form.tech_specs_pdf(class="hidden-file-input") }}
+                    {{ form.tech_specs_pdf(class="hidden-file-input", accept=".pdf") }}
                     {% for error in form.tech_specs_pdf.errors %}<span class="error">[{{ error }}]</span>{% endfor %}
 
                     <button type="button" class="file-upload-btn" data-target-id="{{ form.instruction_manual_pdf.id }}" data-original-text="Upload Instruction Manual">Upload Instruction Manual</button>
-                    {{ form.instruction_manual_pdf(class="hidden-file-input") }}
+                    {{ form.instruction_manual_pdf(class="hidden-file-input", accept=".pdf") }}
                     {% for error in form.instruction_manual_pdf.errors %}<span class="error">[{{ error }}]</span>{% endfor %}
 
                     <button type="button" class="file-upload-btn" data-target-id="{{ form.terms_pdf.id }}" data-original-text="Upload Terms and Conditions">Upload Terms and Conditions</button>
-                    {{ form.terms_pdf(class="hidden-file-input") }}
+                    {{ form.terms_pdf(class="hidden-file-input", accept=".pdf") }}
                     {% for error in form.terms_pdf.errors %}<span class="error">[{{ error }}]</span>{% endfor %}
                 </div>
                 <button type="button" class="submit-btn" onclick="goToStep(3)">Next</button>
@@ -313,9 +313,9 @@
                 <button type="button" class="submit-btn" onclick="goToStep(4)">Next</button>
             </div>
 
-            <!-- Step 4: Costs and Finish -->
+            <!-- Step 4: Costs -->
             <div id="step4" class="step-pane" style="display:none; text-align: center;">
-                <div class="step-title">Costs and Registration</div>
+                <div class="step-title">Costs</div>
                 <div class="cost-inputs">
                     <div class="form-group">
                         {{ form.cost_onsite.label }}
@@ -328,6 +328,26 @@
                         {% for error in form.cost_remote.errors %}<span class="error">[{{ error }}]</span>{% endfor %}
                     </div>
                 </div>
+                <button type="button" class="submit-btn" onclick="goToStep(5)">Next</button>
+            </div>
+
+            <!-- Step 5: Availability -->
+            <div id="step5" class="step-pane" style="display:none; text-align: center;">
+                <div class="step-title">Equipment Availability</div>
+                <div class="form-group" style="max-width: 340px; text-align: left;">
+                    <label style="font-weight: 600; color: var(--primary-color); display: block; margin-bottom: 10px;">
+                        Which days of the week is this equipment available?
+                    </label>
+                    <div id="avail-day-checkboxes" style="display: flex; flex-wrap: wrap; gap: 10px;">
+                        {% for subfield in form.available_days %}
+                            <label style="display: flex; align-items: center; gap: 6px; font-weight: 500; color: var(--text-color); cursor: pointer; background: #131420; border: 1px solid var(--border-color); border-radius: 6px; padding: 6px 14px;">
+                                {{ subfield(style="accent-color: #f0b429;") }}
+                                {{ subfield.label.text }}
+                            </label>
+                        {% endfor %}
+                    </div>
+                    <span id="avail-day-error" class="error" style="display:none;">Please select at least one day.</span>
+                </div>
                 {{ form.submit(class="finish-btn") }}
             </form>
         </div>
@@ -335,91 +355,168 @@
 
     <script>
         let currentStep = 1;
-        const totalSteps = 4;
+        let maxAllowedStep = 1;
+        const totalSteps = 5;
         const stepButtons = document.querySelectorAll('.steps-sidebar .step-btn');
         const stepPanes = document.querySelectorAll('.main-step-content .step-pane');
 
-        function updateStepUI(step) {
-            stepPanes.forEach(pane => {
-                pane.style.display = 'none';
+        function updateSidebarState() {
+            stepButtons.forEach(button => {
+                const step = parseInt(button.getAttribute('data-step'));
+                const locked = step > maxAllowedStep;
+                button.disabled = locked;
+                button.style.opacity = locked ? '0.4' : '1';
+                button.style.cursor = locked ? 'not-allowed' : 'pointer';
             });
+        }
+
+        function updateStepUI(step) {
+            stepPanes.forEach(pane => { pane.style.display = 'none'; });
             const activePane = document.getElementById('step' + step);
-            if (activePane) {
-                activePane.style.display = 'block'; // Use 'block' for form content
+            if (activePane) activePane.style.display = 'block';
+
+            stepButtons.forEach(button => { button.classList.remove('active'); });
+            const activeButton = document.querySelector(`.steps-sidebar .step-btn[data-step="${step}"]`);
+            if (activeButton) activeButton.classList.add('active');
+
+            currentStep = step;
+            updateSidebarState();
+        }
+
+        function clearStepErrors(pane) {
+            pane.querySelectorAll('.custom-error').forEach(el => el.remove());
+        }
+
+        function showFieldError(element, message) {
+            const formGroup = element.closest('.form-group') || element.parentElement;
+            if (formGroup.querySelector('.custom-error')) return;
+            const err = document.createElement('span');
+            err.className = 'error custom-error';
+            err.textContent = message;
+            formGroup.appendChild(err);
+        }
+
+        function validateStep(step) {
+            const pane = document.getElementById('step' + step);
+            clearStepErrors(pane);
+            let valid = true;
+
+            pane.querySelectorAll('input[type="text"], input[type="number"], textarea, select').forEach(input => {
+                if (!input.value.trim()) {
+                    valid = false;
+                    showFieldError(input, 'This field is required.');
+                }
+            });
+
+            pane.querySelectorAll('input[type="file"]').forEach(input => {
+                if (input.files.length === 0) {
+                    valid = false;
+                    showFieldError(input, 'Please upload a file.');
+                    return;
+                }
+
+                const acceptsImages = input.getAttribute('accept') === 'image/*';
+                const acceptsPdf = input.getAttribute('accept') === '.pdf';
+
+                if (acceptsImages) {
+                    for (const file of input.files) {
+                        if (!file.type.startsWith('image/')) {
+                            valid = false;
+                            showFieldError(input, 'Only image files are allowed.');
+                            return;
+                        }
+                    }
+                    if (input.multiple && input.files.length > 4) {
+                        valid = false;
+                        showFieldError(input, 'You can upload a maximum of 4 images.');
+                        return;
+                    }
+                }
+
+                if (acceptsPdf) {
+                    for (const file of input.files) {
+                        if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+                            valid = false;
+                            showFieldError(input, 'Only PDF files are allowed.');
+                            return;
+                        }
+                    }
+                }
+            });
+
+            // Step 5: require at least one day checkbox checked
+            if (step === 5) {
+                const checked = pane.querySelectorAll('input[type="checkbox"]:checked');
+                const errEl = document.getElementById('avail-day-error');
+                if (checked.length === 0) {
+                    valid = false;
+                    if (errEl) errEl.style.display = 'block';
+                } else {
+                    if (errEl) errEl.style.display = 'none';
+                }
             }
 
-            stepButtons.forEach(button => {
-                button.classList.remove('active');
-            });
-            const activeButton = document.querySelector(`.steps-sidebar .step-btn[data-step="${step}"]`);
-            if (activeButton) {
-                activeButton.classList.add('active');
-            }
-            currentStep = step;
+            return valid;
         }
 
         function goToStep(step) {
-            // In a real application, you might add validation here before moving to the next step
-            if (step >= 1 && step <= totalSteps) {
+            if (step === currentStep) return;
+            if (step < currentStep) {
                 updateStepUI(step);
+                return;
             }
+            if (!validateStep(currentStep)) return;
+            if (currentStep + 1 > maxAllowedStep) maxAllowedStep = currentStep + 1;
+            updateStepUI(step);
         }
 
         stepButtons.forEach(button => {
             button.addEventListener('click', () => {
                 const step = parseInt(button.getAttribute('data-step'));
-                goToStep(step);
+                if (step > maxAllowedStep) return;
+                updateStepUI(step);
             });
         });
 
-        // Initial UI setup
         updateStepUI(currentStep);
 
-        // Handle custom file input triggers for upload-area
         document.querySelectorAll('.upload-area').forEach(uploadArea => {
             uploadArea.addEventListener('click', () => {
-                const targetId = uploadArea.getAttribute('data-target-id');
-                const fileInput = document.getElementById(targetId);
-                if (fileInput) {
-                    fileInput.click();
-                }
+                const fileInput = document.getElementById(uploadArea.getAttribute('data-target-id'));
+                if (fileInput) fileInput.click();
             });
         });
 
-        // Handle custom file input triggers for file-upload-btn
         document.querySelectorAll('.file-upload-btn').forEach(button => {
             button.addEventListener('click', () => {
-                const targetId = button.getAttribute('data-target-id');
-                const fileInput = document.getElementById(targetId);
-                if (fileInput) {
-                    fileInput.click();
-                }
+                const fileInput = document.getElementById(button.getAttribute('data-target-id'));
+                if (fileInput) fileInput.click();
             });
         });
 
-        // Optional: Display selected file name
         document.querySelectorAll('.hidden-file-input').forEach(input => {
             input.addEventListener('change', function() {
+                const formGroup = this.closest('.form-group') || this.parentElement;
+                formGroup.querySelectorAll('.custom-error').forEach(el => el.remove());
+
+                if (this.multiple && this.getAttribute('accept') === 'image/*' && this.files.length > 4) {
+                    showFieldError(this, 'You can upload a maximum of 4 images. Please select fewer files.');
+                    this.value = '';
+                    return;
+                }
+
                 const parentUploadArea = this.closest('.upload-area');
-                const parentButton = this.previousElementSibling; // For file-upload-btn
+                const parentButton = document.querySelector(`.file-upload-btn[data-target-id="${this.id}"]`);
 
                 if (parentUploadArea) {
                     const span = parentUploadArea.querySelector('span');
-                    if (this.files.length > 0) {
-                        if (this.multiple) {
-                            span.textContent = `${this.files.length} files selected`;
-                        } else {
-                            span.textContent = this.files[0].name;
-                        }
-                    } else {
-                        span.textContent = 'Click to upload'; // Reset text
-                    }
-                } else if (parentButton && parentButton.classList.contains('file-upload-btn')) {
-                    if (this.files.length > 0) {
-                        parentButton.textContent = this.files[0].name;
-                    } else {
-                        parentButton.textContent = parentButton.getAttribute('data-original-text'); // Reset to original text
-                    }
+                    span.textContent = this.files.length > 0
+                        ? (this.multiple ? `${this.files.length} file(s) selected` : this.files[0].name)
+                        : 'Click to upload';
+                } else if (parentButton) {
+                    parentButton.textContent = this.files.length > 0
+                        ? this.files[0].name
+                        : parentButton.getAttribute('data-original-text');
                 }
             });
         });

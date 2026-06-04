@@ -6,13 +6,21 @@ from wtforms import (
     SubmitField,
     RadioField,
     SelectField,
+    SelectMultipleField,
     TextAreaField,
     FloatField,
     HiddenField,
+    DateField,  # used in ManageAvailabilityForm
 )
 from wtforms.validators import DataRequired, Email, EqualTo, ValidationError, Optional
+from wtforms.widgets import ListWidget, CheckboxInput
 from flask_wtf.file import FileField, FileAllowed, MultipleFileField
 from models import User
+
+
+class MultiCheckboxField(SelectMultipleField):
+    widget = ListWidget(prefix_label=False)
+    option_widget = CheckboxInput()
 
 
 class LoginForm(FlaskForm):
@@ -67,10 +75,17 @@ class EquipmentForm(FlaskForm):
     cost_onsite = FloatField('Cost for On-site Access (per hour)')
     cost_remote = FloatField('Cost for Remote Access (per hour)')
 
+    available_days = MultiCheckboxField(
+        'Available Days',
+        choices=[(str(i), day) for i, day in enumerate(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'])],
+        default=['0', '1', '2', '3', '4']
+    )
+
     submit = SubmitField('Register Equipment')
 
 
 class RentalRequestForm(FlaskForm):
+    selected_dates = HiddenField('Selected Dates')
     experiment_description = TextAreaField('Experiment Description', validators=[DataRequired()], render_kw={"rows": 6, "placeholder": "Describe your experiment, methodology, and objectives..."})
     samples_list = TextAreaField('Required Samples', render_kw={"rows": 4, "placeholder": "List each sample on a new line..."})
     submit = SubmitField('Submit Request')
@@ -79,9 +94,10 @@ class RentalRequestForm(FlaskForm):
 class UniversityApprovalForm(FlaskForm):
     final_cost = FloatField('Final Cost (if different from estimate)', validators=[Optional()])
     university_notes = TextAreaField('Notes for Renter', render_kw={"rows": 4})
-    status = SelectField('Update Status', choices=[
+    status = RadioField('Decision', choices=[
+        ('Pending Approval', 'Keep Pending'),
         ('Approved', 'Approve'),
-        ('Rejected', 'Reject')
+        ('Rejected', 'Reject'),
     ], validators=[DataRequired()])
     submit = SubmitField('Update Booking')
 
@@ -111,3 +127,18 @@ class ReviewReplyForm(FlaskForm):
 class DeleteReplyForm(FlaskForm):
     reply_id = HiddenField('Reply ID', validators=[DataRequired()])
     submit = SubmitField('Delete Reply')
+
+
+class ManageAvailabilityForm(FlaskForm):
+    available_days = MultiCheckboxField(
+        'Available Days',
+        choices=[(str(i), day) for i, day in enumerate(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'])]
+    )
+    block_start = DateField('Block From', validators=[Optional()])
+    block_end = DateField('Block To', validators=[Optional()])
+    submit = SubmitField('Save Changes')
+
+
+class RemoveBlockedDateForm(FlaskForm):
+    date = HiddenField('Date', validators=[DataRequired()])
+    submit = SubmitField('Remove')

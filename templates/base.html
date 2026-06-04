@@ -16,5 +16,12 @@
     {% include '_flash_toasts.html' %}
 
     {% block content %}{% endblock %}
+
+    {% if current_user.is_authenticated %}
+    {% include '_profile_panel.html' %}
+    <button class="profile-fab fab-visible" onclick="openProfilePanel()" title="{{ current_user.username }}">
+        {{ current_user.username[0] }}
+    </button>
+    {% endif %}
 </body>
 </html>

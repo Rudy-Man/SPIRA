@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SPIRA - Science Connected</title>
+    <title>SPIRA – Science Connected</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -17,212 +17,384 @@
 
     <header>
         <div class="container">
-            <a href="{{ url_for('index') }}" class="logo"> <i class="fas fa-flask-vial logo-icon"></i> SPIRA </a>
+            <a href="{{ url_for('index') }}" class="logo">
+                <i class="fas fa-flask-vial logo-icon"></i> SPIRA
+            </a>
             <nav>
                 <ul>
                     <li><a href="{{ url_for('market') }}">Marketplace</a></li>
                     <li><a href="{{ url_for('threads') }}">Threads</a></li>
+                    <li><a href="{{ url_for('about') }}">About</a></li>
                 </ul>
             </nav>
             <div class="header-right">
-                <form class="search-form">
-                    <input type="search" placeholder="Search...">
+                <form class="search-form" action="{{ url_for('market') }}" method="GET">
+                    <input type="search" name="search" placeholder="Search equipment...">
                     <button type="submit"><i class="fas fa-search"></i></button>
                 </form>
-
                 {% if current_user.is_authenticated %}
-                    
                     {% if current_user.is_university %}
-                        <a href="{{ url_for('register_equipment') }}" class="btn btn-secondary">List Equipment</a>
-                        {# Add a link for university users to go back to their equipment list #}
-                        <a href="{{ url_for('my_equipment') }}" class="btn btn-secondary" style="margin-left: 10px;">My Equipment Dashboard</a>
+                        <a href="{{ url_for('register_equipment') }}" class="btn btn-secondary" style="font-size:0.85rem; padding:8px 18px;">List Equipment</a>
+                        <a href="{{ url_for('my_equipment') }}" class="btn btn-secondary" style="font-size:0.85rem; padding:8px 18px;">Dashboard</a>
                     {% endif %}
-
-                    <a href="{{ url_for('logout') }}" class="btn btn-primary">Log Out</a>
-                    <button id="user-profile-button" class="user-profile-btn" aria-label="User Profile">
+                    <button id="user-profile-button" class="user-profile-btn" aria-label="Profile" onclick="openProfilePanel()" title="{{ current_user.username }}">
                         <i class="fas fa-user-circle"></i>
                     </button>
                 {% else %}
                     <a href="{{ url_for('login') }}" class="btn btn-primary">Sign In</a>
                 {% endif %}
             </div>
-             <button class="mobile-menu-toggle" aria-label="Toggle Menu"><i class="fas fa-bars"></i></button>
+            <button class="mobile-menu-toggle" aria-label="Menu"><i class="fas fa-bars"></i></button>
         </div>
     </header>
- 
-     <nav class="mobile-nav">
-         <ul>
+
+    <nav class="mobile-nav">
+        <ul>
             <li><a href="{{ url_for('market') }}">Marketplace</a></li>
             <li><a href="{{ url_for('threads') }}">Threads</a></li>
+            <li><a href="{{ url_for('about') }}">About</a></li>
             <li>
-                <form class="mobile-search-form">
-                    <input type="search" placeholder="Search...">
+                <form class="mobile-search-form" action="{{ url_for('market') }}" method="GET">
+                    <input type="search" name="search" placeholder="Search equipment...">
                     <button type="submit"><i class="fas fa-search"></i></button>
                 </form>
             </li>
         </ul>
     </nav>
- 
+
     <main>
-        <section class="hero hero-1">
+        <!-- ===== HERO ===== -->
+        <section class="hero hero-1" id="hero">
+            <canvas id="particle-canvas"></canvas>
             <div class="container hero-content">
-                <div class="hero-text"> <h1>Science, Connected.</h1>
-                    <p>Empowering global collaboration, one discovery at a time.</p>
+                <div class="hero-text animate-on-scroll">
+                    <div class="hero-tag">Scientific Equipment Marketplace</div>
+                    <h1>Science,<br><span class="hero-gradient">Connected.</span></h1>
+                    <p>Access world-class laboratory instruments. Connect researchers to university equipment. Accelerate discovery.</p>
                     <div class="cta-buttons">
-                        <a href="{{ url_for('market') }}" class="btn btn-primary">Explore Marketplace</a>
-                        <a href="{{ url_for('threads') }}" class="btn btn-secondary">Join a Thread</a>
+                        <a href="{{ url_for('market') }}" class="btn btn-primary">
+                            <i class="fas fa-flask"></i> Explore Marketplace
+                        </a>
+                        {% if not current_user.is_authenticated %}
+                        <a href="{{ url_for('register') }}" class="btn btn-secondary">
+                            Get Started Free
+                        </a>
+                        {% else %}
+                        <a href="{{ url_for('threads') }}" class="btn btn-secondary">
+                            <i class="fas fa-comments"></i> Join a Thread
+                        </a>
+                        {% endif %}
                     </div>
                 </div>
-                <div class="hero-image placeholder"> <span>HERO IMAGE</span>
+                <div class="hero-stats animate-on-scroll" style="animation-delay:0.2s;">
+                    <div class="stat-item">
+                        <div class="stat-num" data-target="500">0</div>
+                        <div class="stat-label">Instruments Listed</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-num" data-target="120">0</div>
+                        <div class="stat-label">Partner Universities</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-num" data-target="2400">0</div>
+                        <div class="stat-label">Research Projects</div>
+                    </div>
                 </div>
             </div>
+            <!-- Scroll hint -->
+            <div style="position:absolute; bottom:28px; left:50%; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; gap:6px; color:var(--text-muted); font-size:0.75rem; font-weight:600; letter-spacing:1px; text-transform:uppercase; animation: fadeUp 2s ease infinite;">
+                <span>Scroll</span>
+                <i class="fas fa-chevron-down" style="font-size:0.7rem;"></i>
+            </div>
         </section>
- 
+
+        <!-- ===== HOW IT WORKS ===== -->
         <section class="global-lab">
             <div class="container">
-                <div class="lab-text">
-                    <h2>The Global Laboratory at Your Fingertips</h2> <p>Create, collaborate, and share with scientists worldwide.</p>
+                <div class="lab-text animate-on-scroll">
+                    <h2>The Global Laboratory at <span>Your Fingertips</span></h2>
+                    <p>Connect with universities worldwide. Request access to cutting-edge instruments. Advance your research.</p>
                 </div>
                 <div class="how-it-works">
-                    <div class="feature-box"> <i class="fas fa-magnifying-glass-chart feature-icon"></i>
-                        <h3>Find</h3>
-                        <p>Discover equipment or collaborators</p>
+                    <div class="feature-box animate-on-scroll">
+                        <i class="fas fa-magnifying-glass-chart feature-icon"></i>
+                        <h3>Discover</h3>
+                        <p>Browse thousands of scientific instruments across physics, chemistry, biology and more.</p>
                     </div>
-                    <div class="feature-box"> <i class="fas fa-users feature-icon"></i>
-                        <h3>Collaborate</h3>
-                        <p>Work together globally</p>
+                    <div class="feature-box animate-on-scroll" style="transition-delay:0.1s;">
+                        <i class="fas fa-calendar-check feature-icon"></i>
+                        <h3>Book</h3>
+                        <p>Select your dates, submit a request, and get approved by the university in one streamlined flow.</p>
                     </div>
-                    <div class="feature-box"> <i class="fas fa-book-open-reader feature-icon"></i>
-                        <h3>Research hub</h3>
-                        <p>Browse and share publications</p>
+                    <div class="feature-box animate-on-scroll" style="transition-delay:0.2s;">
+                        <i class="fas fa-atom feature-icon"></i>
+                        <h3>Research</h3>
+                        <p>Conduct your experiments on-site or remotely with full university support and documentation.</p>
                     </div>
                 </div>
             </div>
         </section>
- 
-        <section class="hero hero-2">
-            <div class="container">
-                 <div class="hero-image placeholder large"> <span>HERO IMAGE</span>
-                </div>
-            </div>
-        </section>
- 
+
+        <!-- ===== FEATURED EQUIPMENT ===== -->
         <section class="marketplace">
             <div class="container">
-                <h2>A Marketplace for Science</h2>
+                <h2 class="animate-on-scroll">Featured Equipment</h2>
+                <p class="section-sub animate-on-scroll">Handpicked instruments available for research access right now.</p>
                 <div class="equipment-carousel">
                     {% for equipment in equipment_list %}
                         <div class="item-card-wrapper">
                             <div class="item-card">
-                                <div class="item-image placeholder small">
+                                <div class="item-image">
                                     {% if equipment.primary_image_filename %}
-                                        <img src="{{ url_for('static', filename='uploads/' + equipment.primary_image_filename) }}" alt="{{ equipment.name }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                                        <img src="{{ url_for('static', filename='uploads/' + equipment.primary_image_filename) }}" alt="{{ equipment.name }}">
+                                    {% else %}
+                                        <div style="width:100%;height:100%;background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;">
+                                            <i class="fas fa-flask" style="font-size:3rem;color:var(--border-bright);"></i>
+                                        </div>
                                     {% endif %}
                                 </div>
-                                <p>{{ equipment.name }} at {{ equipment.university.username }}</p>
-                                <p class="price">${{ equipment.cost_onsite or 'N/A' }} /h</p>
+                                <p>{{ equipment.name }}</p>
+                                <div style="padding:0 16px 4px; font-size:0.82rem; color:var(--text-muted);">
+                                    <i class="fas fa-university"></i> {{ equipment.university.username }}
+                                </div>
+                                <p class="price">
+                                    {% if equipment.cost_onsite %}${{ equipment.cost_onsite | int }}/hr on-site{% else %}Price on request{% endif %}
+                                </p>
+                                <a href="{{ url_for('equipment_info', equipment_id=equipment.id) }}" class="card-link">View Details</a>
                             </div>
+                        </div>
+                    {% else %}
+                        <div style="text-align:center; padding:48px; color:var(--text-muted);">
+                            <i class="fas fa-flask" style="font-size:3rem; margin-bottom:16px; display:block;"></i>
+                            No equipment listed yet. <a href="{{ url_for('register') }}">Be the first!</a>
                         </div>
                     {% endfor %}
                 </div>
+                <div style="text-align:center; margin-top:32px;">
+                    <a href="{{ url_for('market') }}" class="btn btn-primary">
+                        <i class="fas fa-th-large"></i> Browse All Equipment
+                    </a>
+                </div>
             </div>
         </section>
- 
-        <section class="footer-cta" style="background-color: #23272f; color: #f4f4f4;">
+
+        <!-- ===== FOOTER CTA ===== -->
+        <section class="footer-cta">
             <div class="container">
                 <p>"Science has no borders. Neither should opportunity."</p>
-                <a href="{{ url_for('about') }}" class="btn btn-secondary">About us</a>
+                <a href="{{ url_for('about') }}" class="btn btn-secondary">Meet the Team</a>
             </div>
         </section>
     </main>
- 
+
     <footer>
         <div class="container">
-            <p>&copy; 2025 SPIRA. All rights reserved.</p> </div>
+            <p>&copy; 2025 SPIRA. All rights reserved.</p>
+        </div>
     </footer>
- 
-    <div id="overlay" class="overlay"></div>
-    <aside id="user-profile-sidebar" class="sidebar">
-    </aside>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> 
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const overlay = document.getElementById('overlay');
-            const profileSidebar = document.getElementById('user-profile-sidebar');
-            const profileButton = document.getElementById('user-profile-button');
-            const mobileMenu = document.querySelector('.mobile-nav');
-            const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+    // ── Particle Network Animation ────────────────────────────
+    (function() {
+        const canvas = document.getElementById('particle-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        let W, H, particles = [], mouse = { x: null, y: null };
 
-            // Animate on Scroll (AOS) initialization with adjustments
-            document.querySelectorAll('.animate-on-scroll').forEach(element => {
-                element.style.opacity = 0; // Ensure elements are initially hidden
-            });
+        const CONFIG = {
+            count: 75,
+            speed: 0.45,
+            connectDist: 145,
+            mouseDist: 200,
+            colors: ['#f0b429','#fce068','#9f4ef0','#c890ff','#9e7a10'],
+        };
 
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('visible');
-                        observer.unobserve(entry.target); // Animate only once
+        function resize() {
+            W = canvas.width  = canvas.offsetWidth;
+            H = canvas.height = canvas.offsetHeight;
+        }
+
+        function makeParticle() {
+            return {
+                x:  Math.random() * W,
+                y:  Math.random() * H,
+                vx: (Math.random() - 0.5) * CONFIG.speed,
+                vy: (Math.random() - 0.5) * CONFIG.speed,
+                r:  Math.random() * 2.2 + 0.8,
+                color: CONFIG.colors[Math.floor(Math.random() * CONFIG.colors.length)],
+                pulse: Math.random() * Math.PI * 2,
+            };
+        }
+
+        function init() {
+            particles = [];
+            for (let i = 0; i < CONFIG.count; i++) particles.push(makeParticle());
+        }
+
+        function hexToRgb(hex) {
+            const r = parseInt(hex.slice(1,3),16);
+            const g = parseInt(hex.slice(3,5),16);
+            const b = parseInt(hex.slice(5,7),16);
+            return `${r},${g},${b}`;
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, W, H);
+
+            // Connections between particles
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const d  = Math.sqrt(dx * dx + dy * dy);
+                    if (d < CONFIG.connectDist) {
+                        const a = (1 - d / CONFIG.connectDist) * 0.45;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.strokeStyle = `rgba(158,122,16,${a})`;
+                        ctx.lineWidth = 0.7;
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            // Mouse connections
+            if (mouse.x !== null) {
+                particles.forEach(p => {
+                    const dx = p.x - mouse.x;
+                    const dy = p.y - mouse.y;
+                    const d  = Math.sqrt(dx * dx + dy * dy);
+                    if (d < CONFIG.mouseDist) {
+                        const a = (1 - d / CONFIG.mouseDist) * 0.65;
+                        ctx.beginPath();
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(mouse.x, mouse.y);
+                        ctx.strokeStyle = `rgba(159,78,240,${a})`;
+                        ctx.lineWidth = 0.9;
+                        ctx.stroke();
                     }
                 });
-            }, { threshold: 0.1 }); // Adjust threshold as needed
+            }
 
-            document.querySelectorAll('.animate-on-scroll').forEach(element => {
-                observer.observe(element);
+            // Draw particles with glow
+            particles.forEach(p => {
+                p.pulse += 0.02;
+                const r = p.r + Math.sin(p.pulse) * 0.5;
+                const rgb = hexToRgb(p.color);
+
+                // Glow ring
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, r * 2.8, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(${rgb},0.06)`;
+                ctx.fill();
+
+                // Core dot
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = 0.82;
+                ctx.fill();
+                ctx.globalAlpha = 1;
+
+                // Move
+                p.x += p.vx;
+                p.y += p.vy;
+                if (p.x < -10) p.x = W + 10;
+                if (p.x > W + 10) p.x = -10;
+                if (p.y < -10) p.y = H + 10;
+                if (p.y > H + 10) p.y = -10;
             });
 
-            // User profile sidebar toggle
-            if (profileButton && profileSidebar && overlay) {
-                profileButton.addEventListener('click', () => {
-                    profileSidebar.classList.add('active');
-                    overlay.classList.add('active');
-                });
+            requestAnimationFrame(draw);
+        }
 
-                overlay.addEventListener('click', () => {
-                    profileSidebar.classList.remove('active');
-                    overlay.classList.remove('active');
-                });
+        resize();
+        init();
+        draw();
+
+        window.addEventListener('resize', () => { resize(); init(); });
+
+        const hero = document.getElementById('hero');
+        if (hero) {
+            hero.addEventListener('mousemove', e => {
+                const rect = canvas.getBoundingClientRect();
+                mouse.x = e.clientX - rect.left;
+                mouse.y = e.clientY - rect.top;
+            });
+            hero.addEventListener('mouseleave', () => { mouse.x = null; mouse.y = null; });
+        }
+    })();
+
+    // ── Animated Counters ───────────────────────────────────────
+    function animateCounter(el) {
+        const target = parseInt(el.dataset.target, 10);
+        const duration = 1600;
+        const step = target / (duration / 16);
+        let current = 0;
+        const timer = setInterval(() => {
+            current += step;
+            if (current >= target) { current = target; clearInterval(timer); }
+            el.textContent = Math.floor(current).toLocaleString() + (target >= 1000 ? '+' : '+');
+        }, 16);
+    }
+
+    const counterObserver = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+            if (e.isIntersecting) {
+                animateCounter(e.target);
+                counterObserver.unobserve(e.target);
             }
+        });
+    }, { threshold: 0.6 });
 
-            // Mobile menu toggle
-            if (mobileMenu && mobileMenuToggle) {
-                mobileMenuToggle.addEventListener('click', () => {
-                    mobileMenu.classList.toggle('active');
-                });
+    document.querySelectorAll('.stat-num[data-target]').forEach(el => counterObserver.observe(el));
+
+    // ── Scroll Animations ──────────────────────────────────────
+    const scrollObserver = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+            if (e.isIntersecting) {
+                e.target.classList.add('visible');
+                scrollObserver.unobserve(e.target);
             }
+        });
+    }, { threshold: 0.1 });
 
-            // Equipment Carousel
-            $('.equipment-carousel').slick({  
-                centerMode: true,  // Keep item centered
-                centerPadding: '60px', // Adjust padding around center item
-                slidesToShow: 1, // Set to 1 to highlight only the center item
-                autoplay: true, // Keep auto-play functionality
-                autoplaySpeed: 3000, // Adjust auto-play speed as needed
-                dots: true, // Keep dots navigation
-                arrows: true, // Keep arrows navigation
-                infinite: true, // Keep infinite loop
+    document.querySelectorAll('.animate-on-scroll').forEach(el => scrollObserver.observe(el));
+
+    // ── Mobile Menu ───────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', function() {
+        const mobileMenu = document.querySelector('.mobile-nav');
+        const toggle     = document.querySelector('.mobile-menu-toggle');
+        if (mobileMenu && toggle) {
+            toggle.addEventListener('click', () => mobileMenu.classList.toggle('active'));
+        }
+
+        // ── Equipment Carousel ─────────────────────────────────
+        if (typeof $.fn.slick !== 'undefined') {
+            $('.equipment-carousel').slick({
+                centerMode: true,
+                centerPadding: '80px',
+                slidesToShow: 1,
+                autoplay: true,
+                autoplaySpeed: 3200,
+                dots: true,
+                arrows: true,
+                infinite: true,
                 prevArrow: '<button type="button" class="slick-prev"><i class="fas fa-chevron-left"></i></button>',
                 nextArrow: '<button type="button" class="slick-next"><i class="fas fa-chevron-right"></i></button>',
                 responsive: [
-                    {
-                        breakpoint: 1024,
-                        settings: { slidesToShow: 1, centerPadding: '15%', } 
-                    },
-                    {
-                        breakpoint: 600,
-                        settings: {
-                            slidesToShow: 1,
-                            centerPadding: '20px',  // Reduced padding on smaller screens
-                            arrows: false,  // Hide arrows on small screens
-                            dots: false, // Hide dots on smaller screens
-                        }
-                    } 
+                    { breakpoint: 1024, settings: { centerPadding: '40px' } },
+                    { breakpoint: 600,  settings: { centerPadding: '16px', arrows: false } }
                 ]
             });
-        });
+        }
+    });
     </script>
+
+    {% include '_profile_panel.html' %}
 </body>
 </html>

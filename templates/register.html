@@ -4,6 +4,12 @@
 <div class="container">
     <div class="signin-box">
         <h2>Register</h2>
+
+        <a href="{{ url_for('google_login', user_type='user') }}" class="btn"><i class="fab fa-google"></i> Sign up as User with Google</a>
+        <a href="{{ url_for('google_login', user_type='university') }}" class="btn"><i class="fab fa-google"></i> Sign up as University with Google</a>
+
+        <div class="or-divider">or</div>
+
         <form action="" method="post" novalidate>
             {{ form.hidden_tag() }}
             <div class="form-group">

@@ -6,27 +6,29 @@
     <title>Threads - Science Forum</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Poppins', Arial, sans-serif; background: #23272f; margin: 0; color: #f4f4f4; }
-        .container { max-width: 900px; margin: 30px auto; background: #23272f; border: 1px solid #444; border-radius: 8px; box-shadow: 0 2px 8px #222; padding: 24px; }
-        h2 { margin-top: 0; color: #f4f4f4; }
+        body { font-family: 'Poppins', Arial, sans-serif; background: linear-gradient(160deg,#110820 0%,#07080b 35%,#07080b 65%,#0e0620 100%) fixed; margin: 0; color: #f0ece0; }
+        .container { max-width: 900px; margin: 30px auto; background: #0d0e14; border: 1px solid #1a1b28; border-radius: 14px; box-shadow: 0 8px 40px rgba(0,0,0,0.5); padding: 28px; }
+        h2 { margin-top: 0; color: #f0ece0; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
         .nav { display: flex; gap: 20px; }
-        .nav a { color: #34ace0; font-weight: 600; text-decoration: none; padding-bottom: 2px; border-bottom: 2px solid transparent; transition: border 0.2s; }
-        .nav a.active, .nav a:hover { border-bottom: 2px solid #4a47a3; }
+        .nav a { color: #f0b429; font-weight: 600; text-decoration: none; padding-bottom: 2px; border-bottom: 2px solid transparent; transition: border .2s; }
+        .nav a.active, .nav a:hover { border-bottom: 2px solid #f0b429; }
         .thread-list { margin-bottom: 32px; }
-        .thread { background: #2c2f36; border: 1.5px solid #34ace0; border-radius: 6px; padding: 16px; margin-bottom: 18px; color: #f4f4f4; }
-        .thread-title { font-weight: bold; font-size: 1.1em; color: #b0b0ff; margin-bottom: 6px; }
-        .thread-meta { font-size: 0.92em; color: #aaa; margin-bottom: 8px; }
-        .thread-content { margin-bottom: 8px; color: #ccc; }
-        .reply-btn { padding: 4px 14px; border: 2px solid #34ace0; background: #23272f; color: #34ace0; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 0.95em; transition: background 0.2s; }
-        .reply-btn:hover { background: #26324b; }
-        .new-thread-form { background: #2c2f36; border: 1.5px solid #4a47a3; border-radius: 6px; padding: 18px; margin-bottom: 32px; color: #f4f4f4; }
-        .new-thread-form input, .new-thread-form textarea { width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #444; border-radius: 4px; font-family: inherit; background: #23272f; color: #f4f4f4; }
-        .new-thread-form button { padding: 8px 22px; border: 2px solid #34ace0; background: #34ace0; color: #fff; border-radius: 4px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
-        .new-thread-form button:hover { background: #4a47a3; border-color: #4a47a3; }
+        .thread { background: #131420; border: 1px solid #1a1b28; border-left: 3px solid #9e7a10; border-radius: 8px; padding: 16px; margin-bottom: 14px; transition: border-color .2s; }
+        .thread:hover { border-color: #f0b429; border-left-color: #f0b429; }
+        .thread-title { font-weight: 700; font-size: 1.05em; color: #f0b429; margin-bottom: 6px; }
+        .thread-meta { font-size: 0.88em; color: #8888a0; margin-bottom: 8px; }
+        .thread-content { margin-bottom: 8px; color: #c8c4b8; }
+        .reply-btn { padding: 5px 16px; border: 1px solid #252636; background: #131420; color: #f0b429; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.88em; transition: background .2s, border-color .2s; font-family: inherit; }
+        .reply-btn:hover { background: #9e7a10; border-color: #9e7a10; color: #07080b; }
+        .new-thread-form { background: #131420; border: 1px solid #252636; border-top: 2px solid #f0b429; border-radius: 10px; padding: 18px; margin-bottom: 28px; }
+        .new-thread-form input, .new-thread-form textarea { width: 100%; padding: 8px 12px; margin-bottom: 10px; border: 1px solid #1a1b28; border-radius: 7px; font-family: inherit; background: #0d0e14; color: #f0ece0; outline: none; }
+        .new-thread-form input:focus, .new-thread-form textarea:focus { border-color: #9e7a10; }
+        .new-thread-form button { padding: 8px 22px; border: none; background: #f0b429; color: #07080b; border-radius: 7px; font-weight: 700; cursor: pointer; transition: opacity .2s; font-family: inherit; }
+        .new-thread-form button:hover { opacity: 0.85; }
         @media (max-width: 700px) { .container { padding: 10px; } }
         .replies { margin-left: 32px; margin-top: 8px; }
-        .reply { background: #23272f; border-left: 3px solid #34ace0; padding: 10px 12px; margin-bottom: 8px; border-radius: 4px; color: #f4f4f4; }
+        .reply { background: #07080b; border-left: 3px solid #9f4ef0; padding: 10px 12px; margin-bottom: 8px; border-radius: 6px; color: #f0ece0; }
         .reply .reply-btn { margin-top: 6px; }
     </style>
 </head>
@@ -160,9 +162,9 @@
         // Dark mode support
         function applyColorScheme(scheme) {
             if (scheme === 'dark') {
-                document.documentElement.style.setProperty('--bg-color', '#23272f');
-                document.documentElement.style.setProperty('--text-color', '#f4f4f4');
-                document.documentElement.style.setProperty('--light-gray', '#2c2f36');
+                document.documentElement.style.setProperty('--bg-color', '#07080b');
+                document.documentElement.style.setProperty('--text-color', '#f0ece0');
+                document.documentElement.style.setProperty('--light-gray', '#131420');
                 document.documentElement.style.setProperty('--border-color', '#444');
             } else {
                 document.documentElement.style.setProperty('--bg-color', '#ffffff');
@@ -177,5 +179,11 @@
             if (e.key === 'color-scheme') applyColorScheme(e.newValue);
         });
     </script>
+    {% include '_profile_panel.html' %}
+    {% if current_user.is_authenticated %}
+    <button class="profile-fab fab-visible" onclick="openProfilePanel()" title="{{ current_user.username }}">
+        {{ current_user.username[0] }}
+    </button>
+    {% endif %}
 </body>
 </html>
