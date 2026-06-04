@@ -90,10 +90,6 @@ def index():
     equipment_list = Equipment.query.limit(4).all()  
     return render_template('index.html', equipment_list=equipment_list)
 
-@app.route('/threads')
-def threads():
-    return render_template('threads.html', title='Threads')
-
 @app.route('/about')
 def about():
     return render_template('about.html', title='About Us')

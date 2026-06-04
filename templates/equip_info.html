@@ -602,7 +602,6 @@
         <div style="display:flex;gap:18px;">
             <a href="{{ url_for('index') }}" class="nav-btn">Home</a>
             <a href="{{ url_for('market') }}" class="nav-btn">Marketplace</a>
-            <a href="{{ url_for('threads') }}" class="nav-btn">Threads</a>
         </div>
         {% if current_user.is_authenticated %}
         <button onclick="openProfilePanel()" title="{{ current_user.username }}"

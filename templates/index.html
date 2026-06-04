@@ -23,7 +23,6 @@
             <nav>
                 <ul>
                     <li><a href="{{ url_for('market') }}">Marketplace</a></li>
-                    <li><a href="{{ url_for('threads') }}">Threads</a></li>
                     <li><a href="{{ url_for('about') }}">About</a></li>
                 </ul>
             </nav>
@@ -51,7 +50,6 @@
     <nav class="mobile-nav">
         <ul>
             <li><a href="{{ url_for('market') }}">Marketplace</a></li>
-            <li><a href="{{ url_for('threads') }}">Threads</a></li>
             <li><a href="{{ url_for('about') }}">About</a></li>
             <li>
                 <form class="mobile-search-form" action="{{ url_for('market') }}" method="GET">
@@ -80,8 +78,8 @@
                             Get Started Free
                         </a>
                         {% else %}
-                        <a href="{{ url_for('threads') }}" class="btn btn-secondary">
-                            <i class="fas fa-comments"></i> Join a Thread
+                        <a href="{{ url_for('market') }}" class="btn btn-secondary">
+                            <i class="fas fa-flask"></i> Browse Equipment
                         </a>
                         {% endif %}
                     </div>
