@@ -1,5 +1,12 @@
 import os
 import json
+
+# Load .env for local development (no-op in production where env vars are set directly)
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 from datetime import date, timedelta
 from flask import Flask, render_template, redirect, url_for, flash, request, session
 from sqlalchemy import or_, func, text, inspect
